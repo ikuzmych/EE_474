@@ -1,9 +1,9 @@
 /*c_asgn01.c
  *
  *      EE474 introductory C programming assignment #1
- *      Spring 2021
+ *      Spring 2022
  *
- *     Student Name: ____STUDENT NAME and ID# _____
+ *     Student Name: Illya Kuzmych 2127069
  *
  */
 
@@ -145,25 +145,38 @@ print_str("Random seed: "); print_int(seed); print_newl();
 // 1.1  Write a code to print out the 10 integers between 1 and 10 on separate lines:
 print_str("Problem 1.1 Test Results: \n");
 
+  // will print out numbers between 1-10 inclusive
+  for (int i = 1; i <= 10; i++) {
+    printf("%d\n", i);
+  }
+
 //  1.1 test code here ...
 
 // 1.2 Modify 1.1 to print (after the 10 ints):
 //   a) sum of the ints.  b) sum of the ints squared.
 
 print_str("Problem 1.2 Test Results: \n");
-
+  
 //  1.2 code here ...
 
 t1 = 0 ; t2 = 0;
-
-//printf("TST: t1-%d\n", t1);
-
+  int sum_squares = 0;
+  int total_sum = 0;
+  for (int i = 1; i <= 10; i++) {
+    printf("%d\n", i);
+    t1 += i;
+    t2 += i * i;
+  }
 print_int(t1) ;  print_int(t2) ;   print_newl();
 
 
 print_str("Problem 1.3 Test Results:\n");
+// your code for 1.3 here ...
 
-// you code for 1.3 here ...
+/** NOTE TO SELF: No need to modify?
+  * I already have the values of t1 and t2
+  * just need to print them
+  */
 char *l1 = "sum: ";
 char *l2 = "sum of squares: ";
 
@@ -386,8 +399,8 @@ return 0;
 // Part 1.4
 //  your function length_pad() here...
 
-char* length_pad(char *st, int n)
-  {
+char* length_pad(char *st, int n) {
+  
   }
 
 

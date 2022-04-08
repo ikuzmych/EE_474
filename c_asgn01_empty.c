@@ -189,7 +189,27 @@ print_str(l2) ; print_int(t2) ; print_newl();
 //      (i.e. all labels have length 20).
 
 print_str("Problem 1.4 Test Results: \n");
+char* length_pad(char *st, int n) {
+  char* newchar;
+  if (n > strlen(st)) {
+    newchar = (char*) malloc(n); 
 
+    for (int i = 0; i < strlen(st); i++) { // fill up new array with elements from original st
+      newchar[i] = st[i];
+    } 
+
+    for (int j = 0; j <= strlen(st) - n; j++) {
+      newchar[strlen(st) + j] = ' ';
+    }
+    st = newchar;
+  } else if (n < strlen(st)) {
+    
+    for (int i = n; i < strlen(st); i++) {
+      st[i] = ' ';
+    }
+ } 
+  return st;
+}
 print_str(length_pad(l1,20)) ; print_int(t1) ; print_newl();
 print_str(length_pad(l2,20)) ; print_int(t2) ; print_newl();
 
@@ -495,5 +515,3 @@ int randN(int n)   //  return a random integer between 1 and n
   x = 1.0 + (double) n * rand() / RAND_MAX;
   return((int)x);
   }
-
-z

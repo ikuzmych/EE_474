@@ -145,8 +145,10 @@ print_str("Random seed: "); print_int(seed); print_newl();
 
 // 1.1  Write a code to print out the 10 integers between 1 and 10 on separate lines:
 print_str("Problem 1.1 Test Results: \n");
-
 //  1.1 test code here ...
+for (int i = 1; i <= 10; i++) {
+  printf("%d\n", i);
+}
 
 // 1.2 Modify 1.1 to print (after the 10 ints):
 //   a) sum of the ints.  b) sum of the ints squared.
@@ -156,7 +158,11 @@ print_str("Problem 1.2 Test Results: \n");
 //  1.2 code here ...
 
 t1 = 0 ; t2 = 0;
-
+for (int i = 1; i <= 10; i++) {
+  printf("%d\n", i);
+  t1 += i;
+  t2 += i * i;
+}
 //printf("TST: t1-%d\n", t1);
 
 print_int(t1) ;  print_int(t2) ;   print_newl();
@@ -164,7 +170,6 @@ print_int(t1) ;  print_int(t2) ;   print_newl();
 
 print_str("Problem 1.3 Test Results:\n");
 
-// you code for 1.3 here ...
 char *l1 = "sum: ";
 char *l2 = "sum of squares: ";
 

@@ -525,16 +525,21 @@ char * suit_names[]={"Hearts","Diamonds","Clubs","Spades"};
 void names(int card, int suit, char *answer) {
   int i;
   int index = 0; 
-  for (i = 0; i < strlen(answer); i++) {
-    answer[i] = ' ';  // empty the current string just in case
+  memset(answer, 0, strlen(answer)); // empty the current string
+
+  for (i = 0; i < strlen(card_names[card - 1]); i++) {
+    answer[i] = card_names[card - 1][i];
   }
+
+
+
   for (i = 0; i < sizeof(card_names); i++) {
     if (i == card) {
       for (int j = 0; j < strlen(card_names[i]); j++) {
         answer[j] = card_names[i[j]];
         index++; // keeps track of how big our current string is
       }
-    }
+    } m
   }
 
   for (i = 0; i < sizeof(suit_names); i++) {

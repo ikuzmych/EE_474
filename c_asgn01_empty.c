@@ -105,6 +105,7 @@ int dealer_deck_count = 0;  // how many cards have been dealt from a deck
 char* length_pad(char*, int);     // prob 1.4
 int randN(int);                   // 2.1
 void fill(shuffle[N_DECK][2]);             // 2.1
+int check_arr(int currsize, int suit, int card, shuffle deck[N_DECK][2]); // part of 2.1
 unsigned char convert(int card, int suit);  // 2.2
 int valid_card(unsigned char card); // 2.2
 int gcard(unsigned char card);   // 2.2
@@ -189,27 +190,6 @@ print_str(l2) ; print_int(t2) ; print_newl();
 //      (i.e. all labels have length 20).
 
 print_str("Problem 1.4 Test Results: \n");
-char* length_pad(char *st, int n) {
-  char* newchar;
-  if (n > strlen(st)) {
-    newchar = (char*) malloc(n); 
-
-    for (int i = 0; i < strlen(st); i++) { // fill up new array with elements from original st
-      newchar[i] = st[i];
-    } 
-
-    for (int j = 0; j <= strlen(st) - n; j++) {
-      newchar[strlen(st) + j] = ' ';
-    }
-    st = newchar;
-  } else if (n < strlen(st)) {
-    
-    for (int i = n; i < strlen(st); i++) {
-      st[i] = ' ';
-    }
- } 
-  return st;
-}
 print_str(length_pad(l1,20)) ; print_int(t1) ; print_newl();
 print_str(length_pad(l2,20)) ; print_int(t2) ; print_newl();
 
@@ -412,15 +392,62 @@ return 0;
 // Part 1.4
 //  your function length_pad() here...
 
-char* length_pad(char *st, int n)
-  {
-  }
+char* length_pad(char *st, int n) {
+  char* newchar;
+  if (n > strlen(st)) {
+    newchar = (char*) malloc(n + 1); 
+    for (int i = 0; i < strlen(st); i++) { // fill up new array with elements from original st
+      newchar[i] = st[i];
+    }
 
+    for (int j = 0; j <= n - 2; j++) {
+      newchar[strlen(st) + j] = ' ';
+      newchar[n - 1] = '\0';
+    }
+    return newchar;
 
-//Part 2.1
+  } else if (n < strlen(st)) {
+    
+    for (int i = n; i <= strlen(st) - 1; i++) { // add spaces in replacement of old characters
+      st[i] = ' ';
+      if (i == strlen(st) - 1) {
+        st[i] = '\0';
+      }
+    }
+ }
+
+ return st;  // if n < strlen
+
+}
+
+//Part 2.12
 // your function fill() here ...
 void fill(shuffle deck[N_DECK][2]) {
+
+
+      for (int i = 0; i <= 51; i++) {
+        int card, suit;
+        suit = rand() % 4 + 1; // generate a random suit
+        card = rand() % 13 + 1; // generate a random card
+
+        while (check_arr(i, suit, card, deck) == 1) {
+          suit = rand() % 4 + 1; // generate a random suit
+          card = rand() % 13 + 1; // generate a random card
+        }
+        deck[i][0] = card;
+        deck[i][1] = suit;
       }
+}
+
+// helper function for fill
+int check_arr(int currsize, int suit, int card, shuffle deck[N_DECK][2]) {
+  for (int i = 0; i < currsize; i++) {
+    if ((deck[i][0] == card) && (deck[i][1] == suit)) {
+      return 1; 
+    }
+  }
+  return 0; // to behave as else case for condition above in the function
+}
 
 
 // Part 2.2
@@ -429,6 +456,7 @@ void fill(shuffle deck[N_DECK][2]) {
 unsigned char  convert(int card, int suit)
     {
     }
+
 
 
 // Test if a card byte is a valid card

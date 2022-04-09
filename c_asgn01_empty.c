@@ -424,12 +424,14 @@ char* length_pad(char *st, int n) {
 void fill(shuffle deck[N_DECK][2]) {
   for (int i = 0; i <= 51; i++) {
     int card, suit;
-    suit = rand() % 4 + 1; // generate a random suit
-    card = rand() % 13 + 1; // generate a random card
+    suit = randN(4); // generate a random suit
+    card = randN(13); // generate a random card
 
+    // while loop will check the current cards in the deck
+    // to see if it can put in the current random #
     while (check_arr(i, suit, card, deck) == 1) {
-      suit = rand() % 4 + 1; // generate a random suit
-      card = rand() % 13 + 1; // generate a random card
+      suit = randN(4); // generate a random suit
+      card = randN(13); // generate a random card
     }
   deck[i][0] = card;
   deck[i][1] = suit;
@@ -484,10 +486,10 @@ int valid_card(unsigned char card) {
   if ((suitValues > 4) || (suitValues < 1) || (cardValues > 13) || (cardValues < 1)) {
     return CARD_ERROR;
   }
-  return 1;
+  return 1; // if valid_card
 }
-// your code for gsuit and gcard here
 
+// your code for gsuit and gcard here
 int gcard(unsigned char card) {
   int card_int;
   card_int = (0x00) | (card >> 4);
@@ -497,9 +499,7 @@ int gcard(unsigned char card) {
     if (card_int == i) 
       return i;
   }
-
   return CARD_ERROR; // if it does not match any of these cases
-  
 }
 
 int gsuit(unsigned char card) {
@@ -511,7 +511,6 @@ int gsuit(unsigned char card) {
     if (suit_int == i)
       return i;
   }
-
   return CARD_ERROR; // if it does not match any of these cases
 }
 
@@ -523,7 +522,29 @@ int gsuit(unsigned char card) {
 char * card_names[]={"Ace","2","3","4","5","6","7","8","9","10","Jack","Queen","King"};
 char * suit_names[]={"Hearts","Diamonds","Clubs","Spades"};
 
-void names(int card, int suit, char *answer){
+void names(int card, int suit, char *answer) {
+  int i;
+  int index = 0; 
+  for (i = 0; i < strlen(answer); i++) {
+    answer[i] = ' ';  // empty the current string just in case
+  }
+  for (i = 0; i < sizeof(card_names); i++) {
+    if (i == card) {
+      for (int j = 0; j < strlen(card_names[i]); j++) {
+        answer[j] = card_names[i[j]];
+        index++; // keeps track of how big our current string is
+      }
+    }
+  }
+
+  for (i = 0; i < sizeof(suit_names); i++) {
+    if (i == suit) {
+      for (int j = 0; j < strlen(suit_names[i]); j++) {
+        answer[index] = suit_names[i[j]];
+        index++;
+      }
+    }
+  }
 }
 
 

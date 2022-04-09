@@ -168,7 +168,6 @@ for (int i = 1; i <= 10; i++) {
 
 print_int(t1) ;  print_int(t2) ;   print_newl();
 
-
 print_str("Problem 1.3 Test Results:\n");
 
 char *l1 = "sum: ";
@@ -258,7 +257,7 @@ testhand[5] = convert(10,4);
 testhand[6] = convert(3,3);
 
 // Let's check them carefully!
-for (i =0; i<7; i++){
+for (i = 0; i < 7; i++){
     if (testhand[i] == CARD_ERROR) {
         print_str(" check 1 card error: ");
         print_int(i);
@@ -278,7 +277,7 @@ testhand[5] = convert(12,2); // Queen of Diamonds
 testhand[6] = convert(13,4); // King of Spades
 
 int i;
-for (i=0; i<7; i++){
+for (i = 0; i < 7; i++) {
     if (testhand[i] == CARD_ERROR) {
         print_str(" check 2 card error: ");
         print_int(i); print_newl();
@@ -307,7 +306,7 @@ else print_str("8-bit version of Ace of Spades is a VALID card.\n");
 print_str("   2.2.c,d"); print_newl();
 
 
-for(i=0;i<7;i++) {
+for (i = 0; i < 7; i++) {
    int card = gcard(testhand[i]);  //    This part tests 2.2c,d
    int suit = gsuit(testhand[i]);
    print_str("card: "); print_int(card); print_str("   suit: "); print_int(suit);print_newl();
@@ -420,23 +419,21 @@ char* length_pad(char *st, int n) {
 
 }
 
-//Part 2.12
+//Part 2.1
 // your function fill() here ...
 void fill(shuffle deck[N_DECK][2]) {
+  for (int i = 0; i <= 51; i++) {
+    int card, suit;
+    suit = rand() % 4 + 1; // generate a random suit
+    card = rand() % 13 + 1; // generate a random card
 
-
-      for (int i = 0; i <= 51; i++) {
-        int card, suit;
-        suit = rand() % 4 + 1; // generate a random suit
-        card = rand() % 13 + 1; // generate a random card
-
-        while (check_arr(i, suit, card, deck) == 1) {
-          suit = rand() % 4 + 1; // generate a random suit
-          card = rand() % 13 + 1; // generate a random card
-        }
-        deck[i][0] = card;
-        deck[i][1] = suit;
-      }
+    while (check_arr(i, suit, card, deck) == 1) {
+      suit = rand() % 4 + 1; // generate a random suit
+      card = rand() % 13 + 1; // generate a random card
+    }
+  deck[i][0] = card;
+  deck[i][1] = suit;
+    }
 }
 
 // helper function for fill
@@ -452,25 +449,71 @@ int check_arr(int currsize, int suit, int card, shuffle deck[N_DECK][2]) {
 
 // Part 2.2
 //  your code for convert() here
+/**
+ * Convert two integers (from shuffle for example) into char as above
+ * Top 4 bits represent card number (1 - 13)
+ * Bottom 4 bits represent suit (1-4)
+ * @return unsigned char of 8 bits
+ */
+unsigned char convert(int card, int suit) {
+    unsigned char character;
 
-unsigned char  convert(int card, int suit)
-    {
-    }
+    // shift the bottom 4 bits of card to overlap with top 4 bits of 
+    // the character. 
+    // Then, bitwise OR it with the bottom 4 bits being bitwise ANDed with suit bits
 
+    character = (0xF0 & (card << 4)) | (0x0F & suit);
+
+    if ((suit > 4) || (suit < 1) || (card > 13) || (card < 1)) {
+      return CARD_ERROR;
+    } 
+
+    return character;
+}
 
 
 // Test if a card byte is a valid card
-int valid_card(unsigned char card){
+// NOTE TO SELF: seems as though valid_card is being used to compare. 
+// NOT actually returning boolean TRUE or FALSE
+int valid_card(unsigned char card) {
+  int cardValues, suitValues;
+
+  cardValues = (0xF0 & card) >> 4;
+  suitValues = 0x0F & card;
+
+  if ((suitValues > 4) || (suitValues < 1) || (cardValues > 13) || (cardValues < 1)) {
+    return CARD_ERROR;
+  }
+  return 1;
 }
 // your code for gsuit and gcard here
 
-int gcard(unsigned char card)
-  {
-   }
+int gcard(unsigned char card) {
+  int card_int;
+  card_int = (0x00) | (card >> 4);
 
-int gsuit(unsigned char card)
-  {
-   }
+
+  for (int i = 1; i <= 13; i++) {
+    if (card_int == i) 
+      return i;
+  }
+
+  return CARD_ERROR; // if it does not match any of these cases
+  
+}
+
+int gsuit(unsigned char card) {
+  int suit_int;
+  
+  suit_int = 0x0F & card; // bits: 00001111 & suit = 0000(suit)
+
+  for (int i = 1; i <= 4; i++) {
+    if (suit_int == i)
+      return i;
+  }
+
+  return CARD_ERROR; // if it does not match any of these cases
+}
 
 
 

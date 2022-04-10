@@ -361,20 +361,21 @@ dealer_deck_count = 0; // reset to full deck (hands should reappear)
 
 int n_hands = 7;
 
-for (i=0;i<n_hands;i++) {
-    deal(7,hands[i],cards);
+for (i = 0; i < n_hands; i++) {
+    deal(7, hands[i], cards);
 }
 print_str(" I have ");print_int(n_hands); print_str(" new hands\n");
-for (i=0;i<n_hands;i++) {
-    int pct = pairs(7,hands[i]);
-    int trips = trip_s(7,hands[i]);
-    int fourk = four_kind(7,hands[i]);
-    printf("I found %d pairs in hand %d\n",pct,i);
-    printf("I found %d three-of-a-kinds in hand %d\n",trips,i);
-    printf("I found %d four-of-a-kinds in hand %d\n",fourk,i);
-    printf("Hand %d:\n",i);
-    printhand(7,hands[i],buff);
-    print_newl();
+
+for (i = 0; i < n_hands; i++) {
+   int pct = pairs(7,hands[i]);
+   int trips = trip_s(7,hands[i]);
+   int fourk = four_kind(7,hands[i]);
+   printf("I found %d pairs in hand %d\n",pct,i);
+   printf("I found %d three-of-a-kinds in hand %d\n",trips,i);
+   printf("I found %d four-of-a-kinds in hand %d\n",fourk,i);
+   printf("Hand %d:\n",i);
+   printhand(7,hands[i],buff);
+   print_newl();
 }
 
 #ifdef VISUALC
@@ -464,13 +465,13 @@ unsigned char convert(int card, int suit) {
     // the character. 
     // Then, bitwise OR it with the bottom 4 bits being bitwise ANDed with suit bits
 
-    character = (0xF0 & (card << 4)) | (0x0F & suit);
+   character = (0xF0 & (card << 4)) | (0x0F & suit);
 
-    if ((suit > 4) || (suit < 1) || (card > 13) || (card < 1)) {
+   if ((suit > 4) || (suit < 1) || (card > 13) || (card < 1)) {
       return CARD_ERROR;
-    } 
+   } 
 
-    return character;
+   return character;
 }
 
 
@@ -527,7 +528,7 @@ char * suit_names[]={"Hearts","Diamonds","Clubs","Spades"};
 void names(int card, int suit, char *answer) {
    int i;
    int index = 0; // keep track of location in the string
-
+	memset(answer, 0, strlen(answer));
    for (i = 0; i < strlen(card_names[card - 1]); i++) {
       answer[i] = card_names[card - 1][i];
       index++;
@@ -545,7 +546,7 @@ void names(int card, int suit, char *answer) {
 
 void deal(int M, unsigned char hand[7], int deck[N_DECK][2]) {
    for (int i = 0; i < M; i++) {
-		hand[i] = convert(deck[i][0], deck[i][1]);
+		hand[i] = convert(deck[dealer_deck_count][0], deck[dealer_deck_count][1]);
 		dealer_deck_count++;
    }
 }
@@ -554,19 +555,70 @@ void deal(int M, unsigned char hand[7], int deck[N_DECK][2]) {
 /*
  * Print out a hand of cards
  */
-void printhand(int M, unsigned char* hand, char* buff1){
+void printhand(int M, unsigned char* hand, char* buff1) {
+	for (int i = 0; i < M; i++) {
+		names(gcard(hand[i]), gsuit(hand[i]), buff1);
+		print_str(buff1);
+		print_newl();
+		memset(buff1, 0, strlen(buff1));
+	}
 }
 
 
-int pairs(int M, unsigned char hand[]){
+int pairs(int M, unsigned char hand[]) {
+	int pairCount = 0;
+	int pairCheck = 0;
+	for (int i = 0; i < M; i++) {
+		for (int j = i; j < M; j++) {
+			
+			if ((hand[i] & 0xF0) == (hand[j] & 0xF0)) {
+				pairCheck++;
+			}
+		}
+		if (pairCheck == 2) {
+			pairCount++; 
+		}
+		pairCheck = 0;
+	}
+	return pairCount;
 }
 
 
 int trip_s(int M, unsigned char hand[]) {
+	int tripsCount = 0;
+	int tripsCheck = 0;
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < M; j++) {
+			
+			if ((hand[i] & 0xF0) == (hand[j] & 0xF0)) {
+				tripsCheck++;
+			}
+		}
+		if (tripsCheck == 3) {
+			tripsCount++; 
+		}
+		tripsCheck = 0;
+	}
+	return tripsCount;
 }
 
 
 int four_kind(int M, unsigned char hand[]) {
+	int quadsCount = 0;
+	int quadsCheck = 0;
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < M; j++) {
+			
+			if ((hand[i] & 0xF0) == (hand[j] & 0xF0)) {
+				quadsCheck++;
+			}
+		}
+		if (quadsCheck == 4) {
+			quadsCount++; 
+		}
+		quadsCheck = 0;
+	}
+	return quadsCount;
 }
 
 
@@ -602,5 +654,5 @@ int randN(int n)   //  return a random integer between 1 and n
   {
   double x;
   x = 1.0 + (double) n * rand() / RAND_MAX;
-  return((int)x);
+  return ((int) x);
   }

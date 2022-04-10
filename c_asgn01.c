@@ -422,20 +422,20 @@ char* length_pad(char *st, int n) {
 //Part 2.1
 // your function fill() here ...
 void fill(shuffle deck[N_DECK][2]) {
-  for (int i = 0; i <= 51; i++) {
-    int card, suit;
-    suit = randN(4); // generate a random suit
-    card = randN(13); // generate a random card
+   for (int i = 0; i <= 51; i++) {
+		int card, suit;
+		suit = randN(4); // generate a random suit
+		card = randN(13); // generate a random card
 
-    // while loop will check the current cards in the deck
-    // to see if it can put in the current random #
-    while (check_arr(i, suit, card, deck) == 1) {
-      suit = randN(4); // generate a random suit
-      card = randN(13); // generate a random card
-    }
-  deck[i][0] = card;
-  deck[i][1] = suit;
-    }
+		// while loop will check the current cards in the deck
+		// to see if it can put in the current random #
+		while (check_arr(i, suit, card, deck) == 1) {
+			suit = randN(4); // generate a random suit
+			card = randN(13); // generate a random card
+		}
+   deck[i][0] = card;
+   deck[i][1] = suit;
+   }
 }
 
 // helper function for fill
@@ -491,27 +491,29 @@ int valid_card(unsigned char card) {
 
 // your code for gsuit and gcard here
 int gcard(unsigned char card) {
-  int card_int;
-  card_int = (0x00) | (card >> 4);
+   int card_int;
+   card_int = (0x00) | (card >> 4);
 
 
-  for (int i = 1; i <= 13; i++) {
-    if (card_int == i) 
+   for (int i = 1; i <= 13; i++) {
+      if (card_int == i) 
       return i;
-  }
-  return CARD_ERROR; // if it does not match any of these cases
-}
+   }
+
+   return CARD_ERROR; // if it does not match any of these cases
+   }
 
 int gsuit(unsigned char card) {
-  int suit_int;
-  
-  suit_int = 0x0F & card; // bits: 00001111 & suit = 0000(suit)
+   int suit_int;
+   
+   suit_int = 0x0F & card; // bits: 00001111 & suit = 0000(suit)
 
-  for (int i = 1; i <= 4; i++) {
-    if (suit_int == i)
+   for (int i = 1; i <= 4; i++) {
+      if (suit_int == i)
       return i;
-  }
-  return CARD_ERROR; // if it does not match any of these cases
+   }
+   
+   return CARD_ERROR; // if it does not match any of these cases
 }
 
 
@@ -542,7 +544,10 @@ void names(int card, int suit, char *answer) {
 // Part 3.2
 
 void deal(int M, unsigned char hand[7], int deck[N_DECK][2]) {
-     
+   for (int i = 0; i < M; i++) {
+		hand[i] = convert(deck[i][0], deck[i][1]);
+		dealer_deck_count++;
+   }
 }
 
 
@@ -557,11 +562,11 @@ int pairs(int M, unsigned char hand[]){
 }
 
 
-int trip_s(int M, unsigned char hand[]){
+int trip_s(int M, unsigned char hand[]) {
 }
 
 
-int four_kind(int M, unsigned char hand[]){
+int four_kind(int M, unsigned char hand[]) {
 }
 
 

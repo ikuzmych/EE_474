@@ -523,39 +523,26 @@ char * card_names[]={"Ace","2","3","4","5","6","7","8","9","10","Jack","Queen","
 char * suit_names[]={"Hearts","Diamonds","Clubs","Spades"};
 
 void names(int card, int suit, char *answer) {
-  int i;
-  int index = 0; 
-  memset(answer, 0, strlen(answer)); // empty the current string
+   int i;
+   int index = 0; // keep track of location in the string
 
-  for (i = 0; i < strlen(card_names[card - 1]); i++) {
-    answer[i] = card_names[card - 1][i];
-  }
+   for (i = 0; i < strlen(card_names[card - 1]); i++) {
+      answer[i] = card_names[card - 1][i];
+      index++;
+   }
+   answer[index] = ' '; answer[index + 1] = 'o'; answer[index + 2] = 'f'; answer[index + 3] = ' '; // ' of ' 
 
-
-
-  for (i = 0; i < sizeof(card_names); i++) {
-    if (i == card) {
-      for (int j = 0; j < strlen(card_names[i]); j++) {
-        answer[j] = card_names[i[j]];
-        index++; // keeps track of how big our current string is
-      }
-    } m
-  }
-
-  for (i = 0; i < sizeof(suit_names); i++) {
-    if (i == suit) {
-      for (int j = 0; j < strlen(suit_names[i]); j++) {
-        answer[index] = suit_names[i[j]];
-        index++;
-      }
-    }
-  }
+   for (i = 0; i < strlen(suit_names[suit - 1]); i++) {
+      answer[index + 4] = suit_names[suit - 1][i];
+      index++;
+   }
 }
 
 
 // Part 3.2
 
-void deal(int M, unsigned char hand[7], int deck[N_DECK][2]){
+void deal(int M, unsigned char hand[7], int deck[N_DECK][2]) {
+     
 }
 
 

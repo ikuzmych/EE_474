@@ -502,7 +502,6 @@ void printhand(int M, unsigned char* hand, char* buff1) {
 	}
 }
 
-
 int pairs(int M, unsigned char hand[]) {
 	int pairCount = 0;
 	int pairCheck = 0;
@@ -520,7 +519,6 @@ int pairs(int M, unsigned char hand[]) {
 	}
 	return pairCount;
 }
-
 
 int trip_s(int M, unsigned char hand[]) {
 	int tripsCount = 0;

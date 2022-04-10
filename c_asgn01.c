@@ -1,38 +1,12 @@
 /*c_asgn01.c
  *
  *      EE474 introductory C programming assignment #1
- *      Spring 2021
+ *      Spring 2022
  *
- *     Student Name: ____STUDENT NAME and ID# _____
+ *     Student Name: Illya Kuzmych STUDENT NAME and ID# Illya Kuzmych 2127069
  *
  */
 
-/*  Objectives:
-       Gain experience and proficiency with C programming.
-
-
-Format of assignment:
-  1)  make a backup copy of this file
-  2)  enter your name into the space above
-  3)  Read through the comments below and
-edit code into this file to solve the problems.
-  4)  check your results against posted solution
-
-Notes:   You are not required to use #defines for all constants
-in this assignment but please do so for problem 3.
-
-Printing:   Use the following functions to print unless
-directed not to do so:
-
-  print_int(int x)                prints out an integer
-  print_usi(unsigned int x)       prints out an unsigned int
-  print_newl()                    prints a "newline" character
-  print_str(char *x)                 prints a string (pointed to by x)
-  print_dble(double)              prints out a double precision floating point number
-
-These functions are at the bottom of this file.  Feel free to study
-them to see how they work.
-*/
 /*  #include some system library function prototypes */
       //  we will use printf()
 #include <stdio.h>
@@ -164,7 +138,6 @@ for (int i = 1; i <= 10; i++) {
   t1 += i;
   t2 += i * i;
 }
-//printf("TST: t1-%d\n", t1);
 
 print_int(t1) ;  print_int(t2) ;   print_newl();
 
@@ -177,16 +150,7 @@ print_str(l1) ; print_int(t1) ; print_newl();
 print_str(l2) ; print_int(t2) ; print_newl();
 
 
-//  1.4  Write a fcn, char* length_pad(char *st, int n), which takes a string and adds
-//       the right amount of spaces so that it's length is n.  It should return a pointer
-//       the new string.  If the length of st is < n, use malloc() to get memory for a new,
-//       longer string.
-//
-
-//  Add your length_pad function below main.
-
-//   Modify 1.3 to use length_pad() so that the numbers are all starting in col 21
-//      (i.e. all labels have length 20).
+//  1.4
 
 print_str("Problem 1.4 Test Results: \n");
 print_str(length_pad(l1,20)) ; print_int(t1) ; print_newl();
@@ -196,20 +160,11 @@ print_str(length_pad(l2,20)) ; print_int(t2) ; print_newl();
 
 
 
-/************************************************************************
+/**
  * 2.0   Card games
- *
- *  A 'shuffle' is an array of N_DECK pairs of integers.   The first of the pair is the card type
-(0-13 representing ace, 2, 3, .... King) and the second representing the suit (hearts, diamonds, clubs, spades).   Thus a pair of numbers (1-13)(1-4) describes a unique card in the deck.
  */
 
-
-
-
-// 2.1 Write a function to fill a shuffle with N_DECK random integer pairs, BUT,
-//     as with your playing cards, there must be exactly one of each pair in the
-//     shuffle.
-//    Use your function to print out all the "cards" of the shuffle, 7 cards per line.
+// 2.1
 
 print_str("Problem 2.1 Test Results: ");    ; print_newl();
 
@@ -226,22 +181,7 @@ for(i=0;i<N_DECK;i++) {
 print_newl();
 
 
-// 2.2    A 'hand' is an array of seven unsigned chars.  Each char represents one card.  We use a four bit field in the char for each of the two numbers above:  the four most significant bits [7...4] represent the card number (1-13) and the lower four [3...0] represent the suit.
-
-
-//        Write functions to:  a)  convert two integers (from  a shuffle for example) into a char as above.
-//                                    if the ints are invalid (e.g. convert(294802984,138142) is not a card)
-//                                    return CARD_ERROR
-//                             b)  test if a char equals a valid integer pair
-//                             c)  get the integer suit from a char
-//                             d)  get the integer card from a char
-
-//        Both functions a and b must return CARD_ERROR if they get invalid input (such as suit > 4).
-
-//        Write code which verifies these functions work properly and prints results.
-//
-
-//
+// 2.2
 
 print_str("Problem 2.2  Test Results: ");  print_newl();
 
@@ -383,8 +323,6 @@ getchar();
 return 0;
 #endif
 
-
-//****************************************************************************
 }  //  END OF MAIN
 
 
@@ -393,30 +331,30 @@ return 0;
 //  your function length_pad() here...
 
 char* length_pad(char *st, int n) {
-  char* newchar;
-  if (n > strlen(st)) {
-    newchar = (char*) malloc(n + 1); 
-    for (int i = 0; i < strlen(st); i++) { // fill up new array with elements from original st
-      newchar[i] = st[i];
-    }
+	char* newchar;
+	if (n > strlen(st)) {
+		newchar = (char*) malloc(n + 1); 
+		for (int i = 0; i < strlen(st); i++) { // fill up new array with elements from original st
+			newchar[i] = st[i];
+	}
 
-    for (int j = 0; j <= n - 2; j++) {
-      newchar[strlen(st) + j] = ' ';
-      newchar[n - 1] = '\0';
-    }
-    return newchar;
+	for (int j = 0; j <= n - 2; j++) {
+		newchar[strlen(st) + j] = ' ';
+		newchar[n - 1] = '\0';
+	}
+	return newchar;
+	
+	} else if (n < strlen(st)) {
+		
+		for (int i = n; i <= strlen(st) - 1; i++) { // add spaces in replacement of old characters
+			st[i] = ' ';
+			if (i == strlen(st) - 1) {
+			st[i] = '\0';
+			}
+		}
+	} 
 
-  } else if (n < strlen(st)) {
-    
-    for (int i = n; i <= strlen(st) - 1; i++) { // add spaces in replacement of old characters
-      st[i] = ' ';
-      if (i == strlen(st) - 1) {
-        st[i] = '\0';
-      }
-    }
- }
-
- return st;  // if n < strlen
+	return st;  // if n < strlen
 
 }
 
@@ -441,12 +379,12 @@ void fill(shuffle deck[N_DECK][2]) {
 
 // helper function for fill
 int check_arr(int currsize, int suit, int card, shuffle deck[N_DECK][2]) {
-  for (int i = 0; i < currsize; i++) {
-    if ((deck[i][0] == card) && (deck[i][1] == suit)) {
-      return 1; 
-    }
-  }
-  return 0; // to behave as else case for condition above in the function
+	for (int i = 0; i < currsize; i++) {
+		if ((deck[i][0] == card) && (deck[i][1] == suit)) {
+			return 1; 
+		}
+	}
+	return 0; // to behave as else case for condition above in the function
 }
 
 
@@ -459,11 +397,11 @@ int check_arr(int currsize, int suit, int card, shuffle deck[N_DECK][2]) {
  * @return unsigned char of 8 bits
  */
 unsigned char convert(int card, int suit) {
-    unsigned char character;
+   unsigned char character;
 
-    // shift the bottom 4 bits of card to overlap with top 4 bits of 
-    // the character. 
-    // Then, bitwise OR it with the bottom 4 bits being bitwise ANDed with suit bits
+   // shift the bottom 4 bits of card to overlap with top 4 bits of 
+   // the character. 
+   // Then, bitwise OR it with the bottom 4 bits being bitwise ANDed with suit bits
 
    character = (0xF0 & (card << 4)) | (0x0F & suit);
 
@@ -479,15 +417,15 @@ unsigned char convert(int card, int suit) {
 // NOTE TO SELF: seems as though valid_card is being used to compare. 
 // NOT actually returning boolean TRUE or FALSE
 int valid_card(unsigned char card) {
-  int cardValues, suitValues;
+	int cardValues, suitValues;
 
-  cardValues = (0xF0 & card) >> 4;
-  suitValues = 0x0F & card;
+	cardValues = (0xF0 & card) >> 4;
+	suitValues = 0x0F & card;
 
-  if ((suitValues > 4) || (suitValues < 1) || (cardValues > 13) || (cardValues < 1)) {
-    return CARD_ERROR;
-  }
-  return 1; // if valid_card
+	if ((suitValues > 4) || (suitValues < 1) || (cardValues > 13) || (cardValues < 1)) {
+		return CARD_ERROR;
+	}
+	return 1; // if not CARD_ERROR
 }
 
 // your code for gsuit and gcard here

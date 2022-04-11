@@ -502,8 +502,37 @@ void printhand(int M, unsigned char* hand, char* buff1) {
 
 int pairs(int M, unsigned char hand[]) { // 8 bits (top 4 represent card, bottom 4 represent suit)
 	int pairCount = 0;
-	int pairCheck = 0;
-	for (int i = 0; i < M; i++) {
+	int pairCheck = 1;
+
+   int number[M];
+   int fr[sizeof(number) / sizeof(number[0])];
+   int visited = -1;
+   // fill in new array with card values
+   for (int i = 0; i < M; i++) {
+      number[i] = (0x0F & (hand[i] >> 4));
+   }
+   
+   for (int i = 0; i < 13; i++) {
+      int count_elements = 1;
+      for (int j = i + 1; j < 13; i++) {
+         if (number[i] == number[j]) {
+            pairCheck++;
+            fr[j] = visited;
+         }
+      }
+      if (fr[i] != visited) {
+         fr[i] = visited;
+      }
+   }
+   for (int i = 0; i < M; i++) {
+      if (fr[i] == 2) {
+         pairCount++;
+      }
+   }
+   return pairCount;
+}
+
+	/*for (int i = 0; i < M; i++) {
 		for (int j = i; j < M; j++) {
 			
 			if ((hand[i] & 0xF0) == (hand[j] & 0xF0)) { // checks the card values (top 4 bits of character in array)
@@ -516,7 +545,7 @@ int pairs(int M, unsigned char hand[]) { // 8 bits (top 4 represent card, bottom
 		pairCheck = 0;
 	}
 	return pairCount;
-}
+} */
 
 int trip_s(int M, unsigned char hand[]) {
 	int tripsCount = 0;
@@ -528,7 +557,7 @@ int trip_s(int M, unsigned char hand[]) {
 				tripsCheck++;
 			}
 		}
-		if (tripsCheck == 3 && (four_kind(j, hand) != 1)) {
+		if (tripsCheck == 3) {
 			tripsCount++; 
 		}
 		tripsCheck = 0;

@@ -46,8 +46,7 @@ int card, suit;
 
 //  Random number seed.
 //      try  43227 (player 1 has 4 10s)
-int seed = 43227;
-
+int seed = 987;
 // Part 1.2
 int t1, t2;
 
@@ -109,14 +108,13 @@ int main()
 // initialize random numbers.
 //  change the seed for testing.  Use this value to compare results with
 #ifdef VISUALC
-srand(seed);
+
 #endif
 #ifdef LINUX
 // srandom(seed);
 #endif
-
 print_str("Random seed: "); print_int(seed); print_newl();
-
+srand(43227);
 
 // 1.1  Write a code to print out the 10 integers between 1 and 10 on separate lines:
 print_str("Problem 1.1 Test Results: \n");
@@ -369,8 +367,8 @@ void fill(shuffle deck[N_DECK][2]) {
 		// while loop will check the current cards in the deck
 		// to see if it can put in the current random #
 		while (check_arr(i, suit, card, deck) == 1) {
-			suit = randN(4); // generate a random suit
-			card = randN(13); // generate a random card
+			suit = rand() % 4 + 1; // generate a random suit
+			card = rand() % 13 + 1; // generate a random card
 		}
    deck[i][0] = card;
    deck[i][1] = suit;
@@ -512,7 +510,7 @@ int pairs(int M, unsigned char hand[]) { // 8 bits (top 4 represent card, bottom
 				pairCheck++;
 			}
 		}
-		if (pairCheck == 2) {
+		if (pairCheck == 2 && (trip_s(j, hand) != 1)) {
 			pairCount++; 
 		}
 		pairCheck = 0;
@@ -530,7 +528,7 @@ int trip_s(int M, unsigned char hand[]) {
 				tripsCheck++;
 			}
 		}
-		if (tripsCheck == 3) {
+		if (tripsCheck == 3 && (four_kind(j, hand) != 1)) {
 			tripsCount++; 
 		}
 		tripsCheck = 0;

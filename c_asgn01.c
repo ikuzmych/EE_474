@@ -524,21 +524,6 @@ int pairs(int M, unsigned char hand[]) { // 8 bits (top 4 represent card, bottom
    return pairCount;
 }
 
-	/*for (int i = 0; i < M; i++) {
-		for (int j = i; j < M; j++) {
-			
-			if ((hand[i] & 0xF0) == (hand[j] & 0xF0)) { // checks the card values (top 4 bits of character in array)
-				pairCheck++;
-			}
-		}
-		if (pairCheck == 2 && (trip_s(j, hand) != 1)) {
-			pairCount++; 
-		}
-		pairCheck = 0;
-	}
-	return pairCount;
-} */
-
 int trip_s(int M, unsigned char hand[]) {
    int tripsCount = 0;
    int tripsCheck = 0;

@@ -496,7 +496,7 @@ void printhand(int M, unsigned char* hand, char* buff1) {
 		names(gcard(hand[i]), gsuit(hand[i]), buff1);
 		print_str(buff1);
 		print_newl();
-		memset(buff1, 0, strlen(buff1));
+		memset(buff1, 0, strlen(buff1)); // reset buff
 	}
 }
 
@@ -505,7 +505,7 @@ int pairs(int M, unsigned char hand[]) { // 8 bits (top 4 represent card, bottom
    int pairCheck = 0;
    int number[M];
    
-   // fill in new array with card values
+   // fill in new array with card int values
    for (int i = 0; i < M; i++) {
       number[i] = (0x0F & (hand[i] >> 4));
    }
@@ -529,7 +529,7 @@ int trip_s(int M, unsigned char hand[]) {
    int tripsCheck = 0;
    int number[M];
    
-   // fill in new array with card values
+   // fill in new array with card int values
    for (int i = 0; i < M; i++) {
       number[i] = (0x0F & (hand[i] >> 4));
    }
@@ -554,7 +554,7 @@ int four_kind(int M, unsigned char hand[]) {
    int quadsCheck = 0;
    int number[M];
    
-   // fill in new array with card values
+   // fill in new array with card int values
    for (int i = 0; i < M; i++) {
       number[i] = (0x0F & (hand[i] >> 4));
    }
@@ -565,7 +565,7 @@ int four_kind(int M, unsigned char hand[]) {
             quadsCheck++;
          }
       }
-      if (quadsCheck == 3) {
+      if (quadsCheck == 4) {
          quadsCount++;
       }
       quadsCheck = 0;

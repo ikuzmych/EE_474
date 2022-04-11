@@ -431,26 +431,21 @@ int gcard(unsigned char card) {
    int card_int;
    card_int = (0x00) | (card >> 4);
 
-
-   for (int i = 1; i <= 13; i++) {
-      if (card_int == i) 
-      return i;
+   if ((card_int > 13) || (card_int < 1)) {
+      return CARD_ERROR;
    }
-
-   return CARD_ERROR; // if it does not match any of these cases
-   }
+   return card_int;
+}
 
 int gsuit(unsigned char card) {
    int suit_int;
    
    suit_int = 0x0F & card; // bits: 00001111 & suit = 0000(suit)
 
-   for (int i = 1; i <= 4; i++) {
-      if (suit_int == i)
-      return i;
+   if ((suit_int > 4) || (suit_int < 1)) {
+      return CARD_ERROR;
    }
-   
-   return CARD_ERROR; // if it does not match any of these cases
+   return suit_int;
 }
 
 

@@ -46,7 +46,7 @@ int card, suit;
 
 //  Random number seed.
 //      try  43227 (player 1 has 4 10s)
-int seed = 4000;
+int seed = 1;
 // Part 1.2
 int t1, t2;
 
@@ -96,10 +96,7 @@ int pairs(int M, unsigned char hand[]);
 ***********************************************************************/
 int main()
 {
-/************************************************************************
-                    Start code here                                     */
-
-/************************************************************************
+/**
  *
  * PROBLEM 1,  C-Basics
  *
@@ -114,7 +111,7 @@ int main()
 // srandom(seed);
 #endif
 print_str("Random seed: "); print_int(seed); print_newl();
-srand(43227);
+srand(5647);  // trips and a pair in hand 0 on my computer (full house 7s over 6s)
 
 // 1.1  Write a code to print out the 10 integers between 1 and 10 on separate lines:
 print_str("Problem 1.1 Test Results: \n");

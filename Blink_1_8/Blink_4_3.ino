@@ -13,7 +13,6 @@
  */
 
 /*
-// the setup function runs once when you press reset or power the board
 void setup() {
   // initialize the three pins we want as outputs.
   pinMode(10, OUTPUT);

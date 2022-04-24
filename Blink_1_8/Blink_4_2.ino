@@ -3,20 +3,25 @@
 // CSE 474 Lab 1 22sp
 // 4.2
 
-/*
-// the setup function runs once when you press reset or power the board
+/** This code adds a speaker that buzzes alongside the 
+ *  LED blinking
+ *  Pin 10: external LED
+ *  Pin 2: 8 Ohm speaker
+ */ 
+
+
 void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
+  // initialize pin outputs.
   pinMode(10, OUTPUT);
   pinMode(2, OUTPUT);
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(10, HIGH);   // turn the LED on (HIGH is the voltage level)
-  digitalWrite(2, HIGH);
-  delay(200);                       // wait for a second
+  digitalWrite(10, HIGH);   // turn the LED on
+  digitalWrite(2, HIGH);    // click the speaker
+  delay(200);                       // wait for 1/5 second
   digitalWrite(10, LOW);    // turn the LED off by making the voltage LOW
   digitalWrite(2, LOW);
-  delay(200);                       // wait for a second
-}*/
+  delay(200);                       // wait for 1/5 second
+}

@@ -13,11 +13,11 @@
  */
 
 
-char buzzer = 2;
+char buzzer = 2; // variable to hold our pin for later
 int state = 0; // initialize a boolean to swap between on and off states of LEDS
 
 void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
+  // initialize pin outputs.
  pinMode(buzzer, OUTPUT);
  pinMode(LED_BUILTIN, OUTPUT);
  pinMode(10, OUTPUT);
@@ -26,8 +26,10 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
   unsigned int currMillis = millis();
-  /**
-   * 
+  
+  /** Here, the if statement 
+   *  checks if 200 ms has passed, 
+   *  then changes the state of our LEDs
    */
   if (currMillis % 200 == 0) { // every 200 ms, changes states
     if (state == 1) {
@@ -37,16 +39,22 @@ void loop() {
     }
   } 
 
-  
+  /** If state is 1, then turn on built in LED
+   *  and turn off external LED. else, do the opposite
+   */
   if (state == 1) {
     digitalWrite(LED_BUILTIN, HIGH);   // turn the built-in LED on (HIGH is the voltage level)
     digitalWrite(10, LOW);             // turn the external LED off
-  }                   // wait for a second
+  }
   else {
     digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
     digitalWrite(10, HIGH);
-  }                      // wait for a second
-  
+  }
+
+  /** If 4 ms has passed, turn on buzzer, otherwise, 
+   *  turn it off. If 10 seconds passes, turn off buzzer
+   *  indefinitely
+   */
   if (currMillis % 4 == 0 && (currMillis != 10000)) { // turn the speaker off after 10 seconds
     digitalWrite(buzzer, HIGH);
   }

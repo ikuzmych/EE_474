@@ -12,7 +12,7 @@
  * LED_BUILTINL: goes to built-in LED labeled as "L" on the Mega board
  */
 
-/*
+
 void setup() {
   // initialize the three pins we want as outputs.
   pinMode(10, OUTPUT);
@@ -34,4 +34,4 @@ void loop() {
   digitalWrite(LED_BUILTIN, HIGH); // turn the build-in LED off by making the voltage LOW
   digitalWrite(2, LOW);
   delay(200);                       // wait for a 1/5 second
-} */
+}

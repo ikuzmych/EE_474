@@ -31,7 +31,7 @@ void loop() {
    *  checks if 200 ms has passed, 
    *  then changes the state of our LEDs
    */
-  if (currMillis % 200 == 0) { // every 200 ms, changes states
+  if ((currMillis % 200) == 0) { // every 200 ms, changes states
     if (state == 1) {
       state = 0;
     } else {

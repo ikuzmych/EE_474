@@ -37,7 +37,7 @@ void loop() {
     } else {
       state = 1;
     }
-  } 
+  }
 
   /** If state is 1, then turn on built in LED
    *  and turn off external LED. else, do the opposite

@@ -1,3 +1,8 @@
+// Illya Kuzmych 2127069 
+// Ruvim Piholyuk 2128297 
+// CSE 474 Lab 1 22sp
+// 4.2
+
 /*
 // the setup function runs once when you press reset or power the board
 void setup() {

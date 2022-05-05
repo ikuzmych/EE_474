@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <string.h>
 
 //DEFINE YOUR CONSTANTS HERE
 
@@ -44,10 +45,10 @@ int ldif(char, char);
 *************************************************************************/
 
 typedef struct Person {
-    char* FirstName;
-    char* LastName;
-    char* StreetAddr;
-    char* ZipCode;
+    char FirstName[21];
+    char LastName[31];
+    char StreetAddr[81];
+    char ZipCode[6];
     double Height;
     float Weight;
     long int DBirth;

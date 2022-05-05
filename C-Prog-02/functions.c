@@ -259,5 +259,15 @@ int personSize(Person p) {
     ---   ---   ---
 */
 void per_print(Person *p) {
-    printf("Function per_print not implemented\n");
+    
+
+    printf("--- person report: ---\n");
+    printf("First Name:       %s\n", p->FirstName);
+    printf("Last Name:        %s\n", p->LastName);
+    printf("Address:          %.60s\n", p->StreetAddr);
+    printf("Zip:              %s\n", p->ZipCode);
+    printf("Height:           %.2f\n", p->Height);
+    printf("Weight:           %.2f\n", p->Weight);
+    printf("DOB 7/2/2003:     %li\n", p->DBirth);
+    printf("---   ---   ---");
 }

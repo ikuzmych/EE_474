@@ -33,7 +33,6 @@ Printing:  use printf() to print
 
 */
 #include "functions.h"
-#include <math.h>
 
 /*************************************************************************
    Part 2.1:  Bitwise operations

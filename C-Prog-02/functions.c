@@ -1,12 +1,11 @@
 /*
  *
  *      ECE474 introductory C programming assignment  #2
- *      Spring 2021
+ *      Spring 2022
  *
- *      Student Name:
- *      Student ID:
+ *      Student Name: Illya Kuzmych
+ *      Student ID: 2127069
  *
- *      WRITE YOUR CODE IN THIS FILE
  *
  */
 
@@ -68,8 +67,14 @@ Printing:  use printf() to print
  *   your mangled SID is 12812
  */
 
-int mangle(int sid){
-    return 0;
+int mangle(int sid) {
+    int mangled_id = 0;
+    
+    mangled_id = (sid >> 2);
+    mangled_id &= ~(1 << 6);
+    mangled_id ^= 1 << 3;
+
+    return mangled_id;
 }
 
 // Part 2.1.1  More bit manipulation
@@ -105,7 +110,15 @@ int mangle(int sid){
  *  bit_check(d,offmask1,offmask1) --> -1 // contradictory
  */
 
-int  bit_check(int data, int bits_on, int bits_off){
+
+int  bit_check(int data, int bits_on, int bits_off) {
+    
+    if ((bits_on & bits_off) >= 1) {
+        return -1;
+    } else if (((data & bits_on) == bits_on) && ((data & ~bits_off) == data)) { // if data and bits_on are the same, then it worked. 
+        return 1;                                                               // or if data and not bits off are the same, then it also works
+    }
+    
     return 0;
 }
 
@@ -123,8 +136,15 @@ char a_array[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P
  * Dereferencing that pointer should then print 'A'
  */
 
-char * pmatch(char c){
-    return 0;
+char * pmatch(char c) {
+    
+    for (int i = 0; i < 26; i++) {
+        if (a_array[i] == c) {
+            return &a_array[i];
+        }
+    }
+    
+    return NULL;
 }
 
 
@@ -142,10 +162,11 @@ char * pmatch(char c){
  * If the argument does not point to a capital letter A-Y, return -1.
  */
 
-char nlet(char *ptr){
+char nlet(char *ptr) {
     if(*ptr == 'Z')
         return -1;
-    return *(ptr+1);
+
+    return *(ptr + 1);
 }
 
 /*
@@ -157,8 +178,32 @@ char nlet(char *ptr){
  * if either character is not a capital letter, return any negative number < -26
  */
 
-int ldif(char c1, char c2){
-    return 0;
+int ldif(char c1, char c2) {
+    
+    int difference; 
+    int CountC1 = 28;
+    int CountC2 = 28;
+    int badReturn = -9999999;
+
+    for (int i = 0; i < 25; i++) {
+        if ((a_array[i] == c1)) {
+            CountC1 = i;
+        }
+    }
+    
+    for (int j = 0; j < 25; j++) {
+        if ((a_array[j] == c2)) {
+            CountC2 = j;
+        }
+    }
+    
+    if ((CountC1 == 28) || (CountC2 == 28)) {
+        return badReturn;
+    }
+
+    difference = abs(CountC2 - CountC1);
+    
+    return difference;
 }
 
 
@@ -193,7 +238,7 @@ int ldif(char c1, char c2){
  * - the computer processes data in the minimum of 4 or 8 bytes for 32/64 
  * bit processors.
  */
-int personSize(Person p){
+int personSize(Person p) {
     return sizeof(Person);
 }
 /*
@@ -213,6 +258,6 @@ int personSize(Person p){
     DOB 1/1/1900:     34780
     ---   ---   ---
 */
-void per_print(Person *p){
+void per_print(Person *p) {
     printf("Function per_print not implemented\n");
 }

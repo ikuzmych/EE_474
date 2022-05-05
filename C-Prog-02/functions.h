@@ -6,15 +6,15 @@
  *      ECE474 introductory C programming assignment  #2
  *      Spring 2021
  *
- *      Student Name:
- *      Student ID:
+ *      Student Name: Illya Kuzmych
+ *      Student ID: 2127069
  *
- *      WRITE ANY NEW FUNCTION PROTOTYPES IN THIS FILE
  *
  */
 
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 //DEFINE YOUR CONSTANTS HERE
 

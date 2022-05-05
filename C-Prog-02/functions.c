@@ -33,6 +33,7 @@ Printing:  use printf() to print
 
 */
 #include "functions.h"
+#include <math.h>
 
 /*************************************************************************
    Part 2.1:  Bitwise operations
@@ -112,7 +113,7 @@ int mangle(int sid) {
 
 
 int  bit_check(int data, int bits_on, int bits_off) {
-    
+    /* If there is any 1 bit overlapping, this will catch that */
     if ((bits_on & bits_off) >= 1) {
         return -1;
     } else if (((data & bits_on) == bits_on) && ((data & ~bits_off) == data)) { // if data and bits_on are the same, then it worked. 
@@ -138,12 +139,14 @@ char a_array[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P
 
 char * pmatch(char c) {
     
+    // loops through the char array and returns a pointer to the address once it is found in the array
     for (int i = 0; i < 26; i++) {
         if (a_array[i] == c) {
             return &a_array[i];
         }
     }
     
+    /* Returns null pointer if it cannot find the character in the array */
     return NULL;
 }
 
@@ -180,27 +183,33 @@ char nlet(char *ptr) {
 
 int ldif(char c1, char c2) {
     
-    int difference; 
-    int CountC1 = 28;
-    int CountC2 = 28;
-    int badReturn = -9999999;
+    int difference, CountC1, CountC2; // find the difference between the characters in the alphabet
 
+    int badChecker1 = 0; // checks to ensure that the letter is capital and exists in the array
+    int badChecker2 = 0;
+    int badReturn = -9999999; // returns if one of the letters are not capital
+
+    /* loop through the array to find location of the first character */
     for (int i = 0; i < 25; i++) {
         if ((a_array[i] == c1)) {
             CountC1 = i;
+            badChecker1 = 1;
         }
     }
-    
+    /* loop through the array to find location of the second character */
     for (int j = 0; j < 25; j++) {
         if ((a_array[j] == c2)) {
             CountC2 = j;
+            badChecker2 = 1;
         }
     }
     
-    if ((CountC1 == 28) || (CountC2 == 28)) {
+    /* if any of these values stayed the same, it means the character was never found in the array */
+    if ((badChecker1 != 1) || (badChecker2 != 1)) {
         return badReturn;
     }
 
+    /* Finds the difference between Count1 and Count2 in absolute value form */
     difference = abs(CountC2 - CountC1);
     
     return difference;

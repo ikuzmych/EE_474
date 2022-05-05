@@ -209,7 +209,7 @@ int ldif(char c1, char c2) {
     }
 
     /* Finds the difference between Count1 and Count2 in absolute value form */
-    difference = abs(CountC2 - CountC1);
+    difference = CountC2 - CountC1;
     
     return difference;
 }

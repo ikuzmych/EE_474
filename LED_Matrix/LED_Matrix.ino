@@ -1,6 +1,6 @@
 ///*
 // * Written by Ishaan Bhimani 
-// * 
+// *
 // */
 
 #define OP_DECODEMODE  8
@@ -21,31 +21,49 @@ int CLK = 51;
 
 byte spidata[2]; //spi shift register uses 16 bits, 8 for ctrl and 8 for data
 
+int xPosition = 0;
+int yPosition = 0;
+int SW_state = 0;
 void setup(){
-
-  //must do this setup
-  pinMode(DIN, OUTPUT);
-  pinMode(CS, OUTPUT);
-  pinMode(CLK, OUTPUT);
-  digitalWrite(CS, HIGH);
-  spiTransfer(OP_DISPLAYTEST,0);
-  spiTransfer(OP_SCANLIMIT,7);
-  spiTransfer(OP_DECODEMODE,0);
-  spiTransfer(OP_SHUTDOWN,1);
+  Serial.begin(9600);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(2, INPUT_PULLUP);
+//  /* pin 47 */
+//  DDRL |= 1 << DDL2;
+//  /* pin 49 */
+//  DDRL |= 1 << DDL0;
+//  /* pin 51 */
+//  DDRB |= 1 << DDB2;
+//  /* set pin 49 to high */
+//  PORTL |= 1 << PORTL0;
+//
+//  spiTransfer(OP_DISPLAYTEST,0);
+//  spiTransfer(OP_SCANLIMIT,7);
+//  spiTransfer(OP_DECODEMODE,0);
+//  spiTransfer(OP_SHUTDOWN,1);
 }
 
 void loop(){ 
-  int j = 0;
-  int i = 0;
-  for (j = 0; j < 8; j++){ //for each row, set the LEDs
-    spiTransfer(j, 0b10100101);
-    
-  }
-  delay(500);
-  for (i = 0; i < 8; i++){ //for each row, clear the LEDs
-    spiTransfer(i, 0b00000000);
-  }
-  delay(500);
+  xPosition = analogRead(A0);
+  yPosition = analogRead(A1);
+  SW_state = digitalRead(2);
+  Serial.print("X: ");
+  Serial.println(xPosition);
+  Serial.print("Y: ");
+  Serial.println(yPosition);
+  
+//  int j = 0;
+//  int i = 0;
+//  for (j = 0; j < 8; j++){ //for each row, set the LEDs
+//    // spiTransfer(j, 0b10100101);
+//    spiTransfer(3, 0b00100000);
+//  }
+//  delay(500);
+//  for (i = 0; i < 8; i++){ //for each row, clear the LEDs
+//    spiTransfer(i, 0b00000000);
+//  }
+//  delay(500);
 }
 
 void spiTransfer(volatile byte opcode, volatile byte data){

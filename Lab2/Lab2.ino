@@ -237,9 +237,9 @@ void task_mhall(int on) {
 
 // the loop function runs over and over again forever
 void loop() {
-  // lab2task1();   // something else dumb that ruvim made
-  // task_A();   // something dumb ruvim made
-  // task_B();   // sound pattern
+  // lab2task1();
+  // task_A();   // task A go
+  // task_B();   // task B go
   // task_C();
   task_C1();
 }

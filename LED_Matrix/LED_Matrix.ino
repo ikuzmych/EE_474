@@ -52,7 +52,7 @@ void loop(){
   Serial.println(xPosition);
   Serial.print("Y: ");
   Serial.println(yPosition);
-  
+  delay(500);
 //  int j = 0;
 //  int i = 0;
 //  for (j = 0; j < 8; j++){ //for each row, set the LEDs

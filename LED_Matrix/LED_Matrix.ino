@@ -50,31 +50,7 @@ void setup(){
 }
 
 void loop(){ 
-//  xPosition = analogRead(A0);
-//  yPosition = analogRead(A1);
-//  SW_state = digitalRead(2);
-//  Serial.print("X: ");
-//  Serial.println(xPosition);
-//  Serial.print("Y: ");
-//  Serial.println(yPosition);
-//  delay(500);
-//  int j = 0;
-//  int i = 0;
-//  // for (j = 0; j < 8; j++){ //for each row, set the LEDs
-//    // spiTransfer(j, 0b10100101);
-//    spiTransfer(3, 0b00100000);
-//    delay(50);
-//    spiTransfer(3, 0b00000000);
-//    spiTransfer(4, 0b00100000);
-//    
-//  // }
-//  delay(500);
-//  for (i = 0; i < 8; i++){ //for each row, clear the LEDs
-//    spiTransfer(i, 0b00000000);
-//  }
-//  delay(500);
   joyStickGame(analogRead(A0),analogRead(A1));
-  
 }
 
 

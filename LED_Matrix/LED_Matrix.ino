@@ -1,7 +1,4 @@
-///*
-// * Written by Ishaan Bhimani 
-// *
-// */
+/* File dedicated to task 4 and integrating Task B into it */
 
 #define OP_DECODEMODE  8
 #define OP_SCANLIMIT   10
@@ -47,10 +44,6 @@ int calcX, calcY, currX, currY;
 
 
 void setup(){
- // Serial.begin(9600);
-  // pinMode(A0, INPUT);
-  // pinMode(A1, INPUT);
- //  pinMode(2, INPUT_PULLUP);
   /* pin 47 */
   DDRL |= 1 << DDL2;
   /* pin 49 */

@@ -48,9 +48,9 @@ int calcX, calcY, currX, currY;
 
 void setup(){
   Serial.begin(9600);
-  pinMode(A0, INPUT);
-  pinMode(A1, INPUT);
-  pinMode(2, INPUT_PULLUP);
+  // pinMode(A0, INPUT);
+  // pinMode(A1, INPUT);
+ //  pinMode(2, INPUT_PULLUP);
   /* pin 47 */
   DDRL |= 1 << DDL2;
   /* pin 49 */
@@ -59,6 +59,16 @@ void setup(){
   DDRB |= 1 << DDB2;
   /* set pin 49 to high */
   PORTL |= 1 << PORTL0;
+
+
+  DDRK &= ~(1 << DDK0);
+  DDRK &= ~(1 << DDK1);
+  
+  noInterrupts();
+  TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
+  TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
+  DDRH |= 1 << DDH3; // pin 6
+  interrupts();
 
   spiTransfer(OP_DISPLAYTEST,0);
   spiTransfer(OP_SCANLIMIT,7);

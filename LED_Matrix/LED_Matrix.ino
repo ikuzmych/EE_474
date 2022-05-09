@@ -9,11 +9,28 @@
 #define OP_DISPLAYTEST 14
 #define OP_INTENSITY   10
 
+/* Notes for the mary had a little lamb task */
+#define NOTE_c 3830 // 261 Hz
+#define NOTE_d 3400 // 294 Hz
+#define NOTE_e 3038 // 329 Hz
+#define NOTE_f 2864 // 349 Hz
+#define NOTE_g 2550 // 392 Hz
+#define NOTE_a 2272 // 440 Hz
+#define NOTE_b 2028 // 493 Hz
+#define NOTE_C 1912 // 523 Hz
+#define NOTE_R 0
+
+
 //Transfers 1 SPI command to LED Matrix for given row
 //Input: row - row in LED matrix
 //       data - bit representation of LEDs in a given row; 1 indicates ON, 0 indicates OFF
 void spiTransfer(volatile byte row, volatile byte data);
 unsigned long Time = 0;
+int melody[] = { NOTE_e, NOTE_R, NOTE_d, NOTE_R, NOTE_c, NOTE_R, NOTE_d, NOTE_R, NOTE_e, NOTE_R,NOTE_e, NOTE_R,NOTE_e, NOTE_R,NOTE_d, NOTE_R,NOTE_d, NOTE_R,NOTE_d, 
+                 NOTE_R,NOTE_e, NOTE_R,NOTE_g, NOTE_R,NOTE_g, NOTE_R,NOTE_e, NOTE_R,NOTE_d, NOTE_R,NOTE_c, NOTE_R,NOTE_d, NOTE_R,NOTE_e, 
+                 NOTE_R,NOTE_e, NOTE_R,NOTE_e, NOTE_R,NOTE_e, NOTE_R,NOTE_d, NOTE_R,NOTE_d, NOTE_R,NOTE_e, NOTE_R,NOTE_d, NOTE_R,NOTE_c, NOTE_R,NOTE_c };
+
+unsigned long curr = 0;
 // change these pins as necessary
 int DIN = 47;
 int CS =  49;
@@ -49,25 +66,40 @@ void setup(){
   spiTransfer(OP_SHUTDOWN,1);
 }
 
-void loop(){ 
-  joyStickGame(analogRead(A0),analogRead(A1));
+void loop(){
+  joyStickGame(analogRead(A0),analogRead(A1), 1);
 }
 
 
-void joyStickGame(int xPos, int yPos) {
-  calcX = (int) xPos / 145;
-//  calcY = pow(2, (yPos / 128)) + 1;
-  calcY = (int) yPos / 145;
-  spiTransfer(currX, currY);
-  if (Time % 25 == 0) {
-    spiTransfer(currX, 0b00000000);
-    currX = calcX;
-    currY = 0b00000001  << calcY;
-    Serial.print("X: ");
-    Serial.println(currX);
-    Serial.print("Y: ");
-    Serial.println(currY);
+void joyStickGame(int xPos, int yPos, int on) {
+  if (on) {
+    calcX = (int) xPos / 145;
+    calcY = (int) yPos / 145;
+    spiTransfer(currX, currY);
+    if (Time % 50 == 0) {
+      spiTransfer(currX, 0b00000000);
+      currX = calcX;
+      currY = 0b00000001  << calcY;
+    }
+  } else {
+    for (int i = 0; i < 8; i++) {
+      spiTransfer(i, 0b00000000);
+    }
   }
+  if (on) {
+    OCR4A = melody[curr % 53];
+    if (Time % 500 == 0) {
+      curr++;
+    }
+    else if ((melody[curr % 53] == NOTE_R) && (Time % 125 == 0)) {
+      curr++;
+    }
+  }
+  else {
+    OCR4A = 0;
+    curr = 0;
+  }
+
   Time++;
   delay(1);
 }

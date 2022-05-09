@@ -47,7 +47,7 @@ int calcX, calcY, currX, currY;
 
 
 void setup(){
-  Serial.begin(9600);
+ // Serial.begin(9600);
   // pinMode(A0, INPUT);
   // pinMode(A1, INPUT);
  //  pinMode(2, INPUT_PULLUP);

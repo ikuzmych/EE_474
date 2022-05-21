@@ -63,7 +63,7 @@ void task2(int on) {
     OCR4A = 0;
     curr = 0;
   }
-  if (sleep == 1 && timer % 4000 == 0) {
+  if (sleep == 1 && timer % 6000 == 0) {
     sleep = 0;
   }
 }

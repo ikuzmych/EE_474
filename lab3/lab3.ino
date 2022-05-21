@@ -1,9 +1,9 @@
-#define NOTE_1 16000000 / 293 - 1
-#define NOTE_2 16000000 / 329 - 1
-#define NOTE_3 16000000 / 261 - 1
-#define NOTE_4 16000000 / 130 - 1
-#define NOTE_5 16000000 / 196 - 1
-#define NOTE_rest
+#define NOTE_1 16000000 / (16 * 293) - 1
+#define NOTE_2 16000000 / (16 * 329) - 1
+#define NOTE_3 16000000 / (16 * 261) - 1
+#define NOTE_4 16000000 / (16 * 130) - 1
+#define NOTE_5 16000000 / (16 * 196) - 1
+#define NOTE_rest 0
 
 /* array defining all the frequencies of the melody  */
 int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
@@ -47,10 +47,10 @@ void task1(int on) {
 void task2(int on) {
  if (on) {
     OCR4A = melody[curr % 10];
-    if (Time % 1000 == 0) {
+    if (timer % 1000 == 0) {
       curr++;
     }
-    else if ((melody[curr % 10] == NOTE_rest) && (Time % 500 == 0)) {
+    else if ((melody[curr % 10] == NOTE_rest) && (timer % 500 == 0)) {
       curr++;
     }
   }
@@ -62,5 +62,7 @@ void task2(int on) {
 
 
 void loop() {
-  task1();
+  task2(1);
+  timer++;
+  delay(1);
 }

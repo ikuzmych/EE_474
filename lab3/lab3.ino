@@ -47,14 +47,15 @@ void task1(int on) {
 void task2(int on) {
  if (on) {
     OCR4A = melody[curr % 10];
-    if (timer % 1000 == 0) {
+    if ((timer % 1000 == 0) && (melody[curr % 10] != NOTE_rest)) {
       curr++;
     }
-    else if ((melody[curr % 10] == NOTE_rest) && (timer % 500 == 0)) {
+    else if ((melody[curr % 10] == NOTE_rest) && (timer % 2000 == 0)) {
       curr++;
     }
   }
   else {
+    
     OCR4A = 0;
     curr = 0;
   }

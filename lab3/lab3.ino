@@ -1,12 +1,24 @@
-
+unsigned long timer = 0;
 
 
 void setup() {
-  // put your setup code here, to run once:
-
+  DDRL |= 1 << DDL2;
+  
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void task1() {
+  if (timer < 250) {
+    PORTL |= 1 << PORTL2;
+  } else {
+    PORTL &= ~(1 << PORTL2);
+  }
+  if (timer == 1000) {
+    timer = 0;
+  }
+  timer++;
+}
 
+
+void loop() {
+  task1();
 }

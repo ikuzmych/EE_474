@@ -19,7 +19,6 @@
  * Pin 12: DS1
  */
 
-
 /* array defining all the frequencies of the melody  */
 int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
 int curr = 0;
@@ -29,7 +28,20 @@ unsigned long timer;
 
 void setup() {
   DDRL |= 1 << DDL2;
-
+  
+  /* setup for the 4-digit 7-segment display by setting appropriate pins to outputs */
+  DDRE |= 1 << DDE4; // pin 2
+  DDRE |= 1 << DDE5; // pin 3
+  DDRG |= 1 << DDG5; // pin 4
+  DDRE |= 1 << DDE3; // pin 5
+  DDRH |= 1 << DDH3; // pin 6
+  DDRH |= 1 << DDH4; // pin 7
+  DDRH |= 1 << DDH5; // pin 8
+  DDRH |= 1 << DDH6; // pin 9
+  DDRB |= 1 << DDB4; // pin 10
+  DDRB |= 1 << DDB5; // pin 11
+  DDRB |= 1 << DDB6; // pin 12
+  
   noInterrupts();
   TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
   TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
@@ -85,7 +97,25 @@ void task2(int on) {
 
 
 void loop() {
+  PORTH |= 1 << PORTH6; // turn on DS4
+  PORTB |= 1 << PORTB4; // turn on DS3
+  PORTB |= 1 << PORTB5; // turn on DS2
+  PORTB |= 1 << PORTB6; // turn on DS1
+
+  // 0
+  PORTE &= ~(1 << PORTE4); // turn on A
+  PORTE &= ~(1 << PORTE5); // turn on B
+  PORTG &= ~(1 << PORTG5); // turn on C
+  PORTE &= ~(1 << PORTE3); // turn on D
+  PORTH &= ~(1 << PORTH3); // turn on E
+  PORTH &= ~(1 << PORTH4); // turn on F
+  PORTH |= 1 << PORTH5;
+
+
+  
+  /*
   task2(1);
   timer++;
   delay(1);
+  */
 }

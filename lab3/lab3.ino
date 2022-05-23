@@ -109,9 +109,18 @@ void loop() {
   PORTE &= ~(1 << PORTE3); // turn on D
   PORTH &= ~(1 << PORTH3); // turn on E
   PORTH &= ~(1 << PORTH4); // turn on F
-  PORTH |= 1 << PORTH5;
+  PORTH |= 1 << PORTH5;    // turn off G
+  delay(1000);
 
-
+  // 9
+  PORTE &= ~(1 << PORTE4); // turn on A
+  PORTE &= ~(1 << PORTE5); // turn on B
+  PORTG &= ~(1 << PORTG5); // turn on C
+  PORTE &= ~(1 << PORTE3); // turn on D
+  PORTH |= 1 << PORTH3; // turn off E
+  PORTH &= ~(1 << PORTH4); // turn on F
+  PORTH &= ~(1 << PORTH5);    // turn on G
+  delay(1000);
   
   /*
   task2(1);

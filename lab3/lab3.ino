@@ -5,6 +5,21 @@
 #define NOTE_5 16000000 / (16 * 196) - 1
 #define NOTE_rest 0
 
+/**
+ * Pin 2: A
+ * Pin 3: B
+ * Pin 4: C
+ * Pin 5: D
+ * Pin 6: E
+ * Pin 7: F
+ * Pin 8: G
+ * Pin 9: DS4
+ * Pin 10: DS3
+ * Pin 11: DS2
+ * Pin 12: DS1
+ */
+
+
 /* array defining all the frequencies of the melody  */
 int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
 int curr = 0;

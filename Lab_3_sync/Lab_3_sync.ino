@@ -4,8 +4,13 @@
 #define NOTE_4 16000000 / (2 * 130) - 1
 #define NOTE_5 16000000 / (2 * 196) - 1
 #define NOTE_rest 0
+#define N_TASKS 3
+#define READY 0
+#define RUNNING 1
+#define SLEEPING 2
 
-
+void (*taskPointers[N_TASKS]) (void *p);
+int state[N_TASKS];
 byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b01100000, // 1
                               0b11011010, // 2
@@ -39,7 +44,8 @@ unsigned long timer;
 unsigned long counter = 0;
 
 void setup() {
-
+  taskPointers[0] = &task1;
+  
   DDRA = 0b00011110;
   DDRC = 0xFF;
   
@@ -55,7 +61,7 @@ void setup() {
  *  Simple pattern of turning on LED for 
  *  250 ms, off for 750 ms, then repeating
  */
-void task1(int on) {
+void task1(void *p) {
   if (timer % 1000 == 0) {
     PORTL |= 1 << PORTL2;
   } 
@@ -124,7 +130,7 @@ void task3 (int on) {
 
 void loop() {
   timer++;
-  task1(1);
+  task1(p);
   task2(1);
   task3(1);
   delay(1);

@@ -9,8 +9,11 @@
 #define RUNNING 1
 #define SLEEPING 2
 
-void (*taskPointers[N_TASKS]) (void *p);
+
+void (*taskPointers[N_TASKS]) (void);
 int state[N_TASKS];
+int sleepingTime[N_TASKS]; // to keep track of how long each function needs to sleep, will constantly decrement
+
 byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b01100000, // 1
                               0b11011010, // 2
@@ -39,12 +42,15 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
 /* array defining all the frequencies of the melody  */
 int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
 int curr = 0;
+int task_index;
 int sleep;
 unsigned long timer;
 unsigned long counter = 0;
 
 void setup() {
-  taskPointers[0] = &task1;
+  taskPointers[0] = task1;
+  taskPointers[1] = task2;
+  taskPointers[2] = NULL;
   
   DDRA = 0b00011110;
   DDRC = 0xFF;
@@ -61,7 +67,7 @@ void setup() {
  *  Simple pattern of turning on LED for 
  *  250 ms, off for 750 ms, then repeating
  */
-void task1(void *p) {
+void task1(void) {
   if (timer % 1000 == 0) {
     PORTL |= 1 << PORTL2;
   } 
@@ -73,8 +79,8 @@ void task1(void *p) {
 /**
  * Playing a song for Task 2...
  */
-void task2(int on) {
- if (on && !sleep) {
+void task2(void) {
+ if (state[task_index] != SLEEPING) {    
     OCR4A = melody[curr % 10];
     if (timer % 1000 == 0 && !(melody[curr % 10] == NOTE_rest)) {
       curr++;
@@ -97,40 +103,23 @@ void task2(int on) {
   }
 }
 
-void task3 (int on) {
-  if (on) {
-    if (timer % 100 == 0) counter++;
-    
-    if (timer % 4 == 0) {
-      PORTC = 0b00000000;
-      PORTA = 0b11111101;
-      PORTC = seven_seg_digits[counter % 10];
-    }
-    else if (timer % 4 == 1) {
-      PORTC = 0b00000000;
-      PORTA = 0b11111011;
-      PORTC = seven_seg_digits[(counter / 10) % 10];
-      PORTC |= 0b00000001;
-    }
-    else if (timer % 4 == 2) {     
-      PORTC = 0b00000000;
-      PORTA = 0b11110111;
-      PORTC = seven_seg_digits[(counter / 100) % 10];
-    }
-    else if (timer % 4 == 3) {
-      PORTC = 0b00000000;
-      PORTA = 0b11101111;
-      PORTC = seven_seg_digits[(counter / 1000) % 10];
-    }
-  } else {
-    PORTA = 0b11111111;
-  }
+void start_function(void (*functionPtr) () ) {
+  functionPtr();
 }
 
 void scheduler() {
-  
+  if ((taskPointers[task_index] == NULL) && (task_index != 0)) {
+    task_index = 0;
+  } 
+  if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
+    // do something? idk
+  }
+  start_function(taskPointers[task_index]);
+  task_index++;
+  return;
 }
 
 void loop() {
   scheduler();
+  delay(1); // gonna need to make our own
 }

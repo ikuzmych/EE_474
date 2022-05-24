@@ -127,11 +127,10 @@ void task3 (int on) {
   }
 }
 
+void scheduler() {
+  
+}
 
 void loop() {
-  timer++;
-  task1(p);
-  task2(1);
-  task3(1);
-  delay(1);
+  scheduler();
 }

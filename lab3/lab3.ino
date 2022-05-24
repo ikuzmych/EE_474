@@ -1,8 +1,8 @@
-#define NOTE_1 16000000 / (16 * 293) - 1
-#define NOTE_2 16000000 / (16 * 329) - 1
-#define NOTE_3 16000000 / (16 * 261) - 1
-#define NOTE_4 16000000 / (16 * 130) - 1
-#define NOTE_5 16000000 / (16 * 196) - 1
+#define NOTE_1 16000000 / (2 * 293) - 1
+#define NOTE_2 16000000 / (2 * 329) - 1
+#define NOTE_3 16000000 / (2 * 261) - 1
+#define NOTE_4 16000000 / (2 * 130) - 1
+#define NOTE_5 16000000 / (2 * 196) - 1
 #define NOTE_rest 0
 
 
@@ -43,11 +43,11 @@ void setup() {
   DDRA = 0b00011110;
   DDRC = 0xFF;
   
-//  noInterrupts();
-//  TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
-//  TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
-//  DDRH |= 1 << DDH3; // pin 6
-//  interrupts();
+  noInterrupts();
+  TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
+  TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
+  DDRH |= 1 << DDH3; // pin 6
+  interrupts();
   
 }
 
@@ -56,17 +56,12 @@ void setup() {
  *  250 ms, off for 750 ms, then repeating
  */
 void task1(int on) {
-  if (timer == 1) {
+  if (timer % 1000 == 0) {
     PORTL |= 1 << PORTL2;
   } 
-  if (timer == 250) {
+  if (timer % 1250 == 0) {
     PORTL &= ~(1 << PORTL2);
   }
-  if (timer > 1000) {
-    timer = 0;
-  }
-  timer++;
-  delay(1);
 }
 
 /**
@@ -109,6 +104,7 @@ void task3 (int on) {
       PORTC = 0b00000000;
       PORTA = 0b11111011;
       PORTC = seven_seg_digits[(counter / 10) % 10];
+      PORTC |= 0b00000001;
     }
     else if (timer % 4 == 2) {     
       PORTC = 0b00000000;
@@ -128,7 +124,8 @@ void task3 (int on) {
 
 void loop() {
   timer++;
- // task2(1);
+  task1(1);
+  task2(1);
   task3(1);
   delay(1);
 }

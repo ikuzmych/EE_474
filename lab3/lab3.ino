@@ -5,6 +5,17 @@
 #define NOTE_5 16000000 / (16 * 196) - 1
 #define NOTE_rest 0
 
+
+byte seven_seg_digits[10] = { 0b11111100, // 0
+                              0b01100000, // 1
+                              0b11011010, // 2
+                              0b11110010, // 3
+                              0b01100110, // 4
+                              0b10110110, // 5 
+                              0b10111110, // 6
+                              0b11100000, // 7
+                              0b11111110, // 8
+                              0b11100110 }; // 9
 /**
  * Pin 2: A
  * Pin 3: B
@@ -13,10 +24,10 @@
  * Pin 6: E
  * Pin 7: F
  * Pin 8: G
- * Pin 9: DS4
- * Pin 10: DS3
- * Pin 11: DS2
- * Pin 12: DS1
+ * Pin 36: DS4
+ * Pin 35: DS3
+ * Pin 34: DS2
+ * Pin 33: DS1
  */
 
 /* array defining all the frequencies of the melody  */
@@ -24,29 +35,18 @@ int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4
 int curr = 0;
 int sleep;
 unsigned long timer;
-
+unsigned long counter = 0;
 
 void setup() {
-  DDRL |= 1 << DDL2;
+
+  DDRA = 0b00011110;
+  DDRC = 0xFF;
   
-  /* setup for the 4-digit 7-segment display by setting appropriate pins to outputs */
-  DDRE |= 1 << DDE4; // pin 2
-  DDRE |= 1 << DDE5; // pin 3
-  DDRG |= 1 << DDG5; // pin 4
-  DDRE |= 1 << DDE3; // pin 5
-  DDRH |= 1 << DDH3; // pin 6
-  DDRH |= 1 << DDH4; // pin 7
-  DDRH |= 1 << DDH5; // pin 8
-  DDRH |= 1 << DDH6; // pin 9
-  DDRB |= 1 << DDB4; // pin 10
-  DDRB |= 1 << DDB5; // pin 11
-  DDRB |= 1 << DDB6; // pin 12
-  
-  noInterrupts();
-  TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
-  TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
-  DDRH |= 1 << DDH3; // pin 6
-  interrupts();
+//  noInterrupts();
+//  TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
+//  TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
+//  DDRH |= 1 << DDH3; // pin 6
+//  interrupts();
   
 }
 
@@ -95,36 +95,39 @@ void task2(int on) {
   }
 }
 
+void task3 (int on) {
+  if (on) {
+    if (timer % 100 == 0) counter++;
+    
+    if (timer % 4 == 0) {
+      PORTC = 0b00000000;
+      PORTA = 0b11111101;
+      PORTC = seven_seg_digits[counter % 10];
+    }
+    else if (timer % 4 == 1) {
+      PORTC = 0b00000000;
+      PORTA = 0b11111011;
+      PORTC = seven_seg_digits[(counter / 10) % 10];
+    }
+    else if (timer % 4 == 2) {     
+      PORTC = 0b00000000;
+      PORTA = 0b11110111;
+      PORTC = seven_seg_digits[(counter / 100) % 10];
+    }
+    else if (timer % 4 == 3) {
+      PORTC = 0b00000000;
+      PORTA = 0b11101111;
+      PORTC = seven_seg_digits[(counter / 1000) % 10];
+    }
+  } else {
+    PORTA = 0b11111111;
+  }
+}
+
 
 void loop() {
-  PORTH |= 1 << PORTH6; // turn on DS4
-  PORTB |= 1 << PORTB4; // turn on DS3
-  PORTB |= 1 << PORTB5; // turn on DS2
-  PORTB |= 1 << PORTB6; // turn on DS1
-
-  // 0
-  PORTE &= ~(1 << PORTE4); // turn on A
-  PORTE &= ~(1 << PORTE5); // turn on B
-  PORTG &= ~(1 << PORTG5); // turn on C
-  PORTE &= ~(1 << PORTE3); // turn on D
-  PORTH &= ~(1 << PORTH3); // turn on E
-  PORTH &= ~(1 << PORTH4); // turn on F
-  PORTH |= 1 << PORTH5;    // turn off G
-  delay(1000);
-
-  // 9
-  PORTE &= ~(1 << PORTE4); // turn on A
-  PORTE &= ~(1 << PORTE5); // turn on B
-  PORTG &= ~(1 << PORTG5); // turn on C
-  PORTE &= ~(1 << PORTE3); // turn on D
-  PORTH |= 1 << PORTH3; // turn off E
-  PORTH &= ~(1 << PORTH4); // turn on F
-  PORTH &= ~(1 << PORTH5);    // turn on G
-  delay(1000);
-  
-  /*
-  task2(1);
   timer++;
+ // task2(1);
+  task3(1);
   delay(1);
-  */
 }

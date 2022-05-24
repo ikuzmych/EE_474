@@ -17,17 +17,18 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b11111110, // 8
                               0b11100110 }; // 9
 /**
- * Pin 2: A
- * Pin 3: B
- * Pin 4: C
- * Pin 5: D
- * Pin 6: E
- * Pin 7: F
- * Pin 8: G
- * Pin 36: DS4
- * Pin 35: DS3
- * Pin 34: DS2
- * Pin 33: DS1
+ * Pin 30: A
+ * Pin 31: B
+ * Pin 32: C
+ * Pin 33: D
+ * Pin 34: E
+ * Pin 35: F
+ * Pin 36: G
+ * Pin 37: DP
+ * Pin 23: DS4
+ * Pin 24: DS3
+ * Pin 25: DS2
+ * Pin 26: DS1
  */
 
 /* array defining all the frequencies of the melody  */

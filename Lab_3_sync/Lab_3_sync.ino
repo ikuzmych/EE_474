@@ -111,12 +111,12 @@ void task2(void) {
 }
 
 void start_function(void (*functionPtr) () ) {
-  functionPtr();
+  functionPtr(); // runs the function that was passed down
   return;
 }
 
 void sleep_474 (int t) {
-  state[task_index] = SLEEPING;
+  state[task_index] = SLEEPING; // change the state of the current task to sleep
   sleepingTime[task_index] = t;
   return;
 }

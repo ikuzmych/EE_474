@@ -68,6 +68,7 @@ void setup() {
  *  Simple pattern of turning on LED for 
  *  250 ms, off for 750 ms, then repeating
  */
+/* 
 void task1(void) {
  if (state[task_index] != SLEEPING) {
     state[task_index] = RUNNING; 
@@ -79,6 +80,25 @@ void task1(void) {
     }
     state[task_index] = READY;
  } else state[task_index] = READY;
+} */
+int x = 0;
+void task1(void) {
+ if (state[task_index] != SLEEPING) {
+    state[task_index] = RUNNING; 
+    if (x < 250) {
+      PORTL |= 1 << PORTL2;
+    } else {
+      PORTL &= ~(1 << PORTL2);    
+    }
+    state[task_index] = READY;
+ } else {
+    state[task_index] = READY;
+ }
+ if (x == 1000) {
+  x = 0;
+ }
+ x++;
+ return;
 }
 
 /**

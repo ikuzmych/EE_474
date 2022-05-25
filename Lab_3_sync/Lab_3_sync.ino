@@ -40,7 +40,7 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
  */
 
 /* array defining all the frequencies of the melody  */
-int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
+long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
 int curr = 0;
 int task_index;
 // int sleep;
@@ -98,8 +98,9 @@ void task2(void) {
       sleep_474 (4000);
       curr = 0;
       OCR4A = 0;
+    } else {
+      state[task_index] = READY;
     }
-    state[task_index] = READY;
   }
   else {
     OCR4A = 0;
@@ -129,9 +130,9 @@ void scheduler(void) {
   if (task_index > 3) { // just in case above one fails
     task_index = 0;
   }
-  if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
-    // end;
-  }
+//  if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
+//    // end;
+//  }
   start_function(taskPointers[task_index]);
   task_index++;
   return;

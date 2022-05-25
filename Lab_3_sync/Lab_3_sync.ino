@@ -45,7 +45,7 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
  */
 
 /* array defining all the frequencies of the melody  */
-long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
+long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
 int curr = 0;
 int task_index;
 // int sleep;
@@ -67,7 +67,8 @@ void setup() {
 
   /* for the delay timer */
   TCCR3A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
-  TCCR3B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
+  TCCR3B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select (prescaler of 1), clear timer on compare
+  TIMSK3 = B00000010; // enable compare match interrupt for TIMER3
   OCR3A = DELAY_TIMEOUT_VALUE;
   
   DDRH |= 1 << DDH3; // pin 6
@@ -76,8 +77,7 @@ void setup() {
 }
 
 ISR(TIMER3_COMPA_vect) {
-  // TIMER3A = 0;
-  isr_flag = TICK;
+    isr_flag = TICK;
 }
 
 /** 
@@ -110,11 +110,11 @@ void task1(void) {
  } else {
     state[task_index] = READY;
  }
- if (x == 1000) {
-  x = 0;
- }
- x++;
- return;
+  if (x == 1000) {
+    x = 0;
+  }
+  x++;
+  return;
 }
 
 /**
@@ -123,15 +123,15 @@ void task1(void) {
 void task2(void) {
  if (state[task_index] != SLEEPING) {
     state[task_index] = RUNNING;   
-    OCR4A = melody[curr % 10];
+    OCR4A = melody[curr % 9];
     if (timer % 1000 == 0 && !(melody[curr % 10] == NOTE_rest)) {
       curr++;
     }
-    else if ((melody[curr % 10] == NOTE_rest) && (timer % 2000 == 0)) {
+    else if ((melody[curr % 9] == NOTE_rest) && (timer % 2000 == 0)) {
       curr++;
     }
-    if ( curr == 10 ) {
-      sleep_474 (4000);
+    if ( curr == 9 ) {
+      sleep_474 (2000);
       curr = 0;
       OCR4A = 0;
     } else {
@@ -178,7 +178,8 @@ void loop() {
   if (isr_flag == TICK) {
     timer++;
     scheduler();
-    isr_flag = NON_TICK;
+    isr_flag = NON_TICK; // reset the interrupt flag
   }
+  
   // delay(1)
 }

@@ -43,7 +43,7 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
 int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
 int curr = 0;
 int task_index;
-int sleep;
+// int sleep;
 unsigned long timer;
 unsigned long counter = 0;
 
@@ -114,7 +114,7 @@ void start_function(void (*functionPtr) () ) {
   functionPtr(); // runs the function that was passed down
   return;
 }
-
+ 
 void sleep_474 (int t) {
   state[task_index] = SLEEPING; // change the state of the current task to sleep
   sleepingTime[task_index] = t;
@@ -125,7 +125,7 @@ void scheduler(void) {
   if ((taskPointers[task_index] == NULL) && (task_index != 0)) {
     task_index = 0;
   }
-  if (task_index > 3) {
+  if (task_index > 3) { // just in case above one fails
     task_index = 0;
   }
   if ((taskPointers[task_index] == NULL) && (task_index == 0)) {

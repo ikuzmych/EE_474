@@ -68,19 +68,24 @@ void setup() {
  *  250 ms, off for 750 ms, then repeating
  */
 void task1(void) {
-  if (timer % 1000 == 0) {
-    PORTL |= 1 << PORTL2;
-  } 
-  if (timer % 1250 == 0) {
-    PORTL &= ~(1 << PORTL2);
-  }
+ if (state[task_index] != SLEEPING) {
+    state[task_index] = RUNNING; 
+    if (timer % 1000 == 0) {
+      PORTL |= 1 << PORTL2;
+    } 
+    if (timer % 1250 == 0) {
+      PORTL &= ~(1 << PORTL2);
+    }
+    state[task_index] = READY;
+ } else state[task_index] = READY;
 }
 
 /**
  * Playing a song for Task 2...
  */
 void task2(void) {
- if (state[task_index] != SLEEPING) {    
+ if (state[task_index] != SLEEPING) {
+    state[task_index] = RUNNING;   
     OCR4A = melody[curr % 10];
     if (timer % 1000 == 0 && !(melody[curr % 10] == NOTE_rest)) {
       curr++;
@@ -89,30 +94,42 @@ void task2(void) {
       curr++;
     }
     if ( curr == 10 ) {
-      sleep = 1;
+      sleep_474 (4000);
       curr = 0;
       OCR4A = 0;
     }
+    state[task_index] = READY;
   }
   else {
     OCR4A = 0;
     curr = 0;
+    sleepingTime[task_index]--;
   }
-  if (sleep == 1 && timer % 6000 == 0) {
-    sleep = 0;
+  if (sleepingTime[task_index] == 0) {
+    state[task_index] = READY;
   }
 }
 
 void start_function(void (*functionPtr) () ) {
   functionPtr();
+  return;
+}
+
+void sleep_474 (int t) {
+  state[task_index] = SLEEPING;
+  sleepingTime[task_index] = t;
+  return;
 }
 
 void scheduler() {
   if ((taskPointers[task_index] == NULL) && (task_index != 0)) {
     task_index = 0;
-  } 
+  }
+  if (task_index > 3) {
+    task_index = 0;
+  }
   if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
-    // do something? idk
+    end;
   }
   start_function(taskPointers[task_index]);
   task_index++;

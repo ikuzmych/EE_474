@@ -121,7 +121,7 @@ void sleep_474 (int t) {
   return;
 }
 
-void scheduler() {
+void scheduler(void) {
   if ((taskPointers[task_index] == NULL) && (task_index != 0)) {
     task_index = 0;
   }

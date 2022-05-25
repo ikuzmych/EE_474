@@ -129,7 +129,7 @@ void scheduler(void) {
     task_index = 0;
   }
   if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
-    end;
+    // end;
   }
   start_function(taskPointers[task_index]);
   task_index++;

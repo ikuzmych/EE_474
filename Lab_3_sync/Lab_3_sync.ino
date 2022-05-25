@@ -9,10 +9,15 @@
 #define RUNNING 1
 #define SLEEPING 2
 
+#define NON_TICK 0
+#define TICK 1
+
+#define DELAY_TIMEOUT_VALUE 16000000 / (2 * 500) - 1
 
 void (*taskPointers[N_TASKS]) (void);
 int state[N_TASKS];
 int sleepingTime[N_TASKS]; // to keep track of how long each function needs to sleep, will constantly decrement
+volatile byte isr_flag;
 
 byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b01100000, // 1
@@ -57,11 +62,22 @@ void setup() {
   DDRL |= 1 << DDL2;
   
   noInterrupts();
-  TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
+  TCCR4A = B01010100; // bottom two bits 0 (WGM31 & WGM30)
   TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
+
+  /* for the delay timer */
+  TCCR3A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
+  TCCR3B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
+  OCR3A = DELAY_TIMEOUT_VALUE;
+  
   DDRH |= 1 << DDH3; // pin 6
   interrupts();
   
+}
+
+ISR(TIMER3_COMPA_vect) {
+  // TIMER3A = 0;
+  isr_flag = TICK;
 }
 
 /** 
@@ -159,7 +175,10 @@ void scheduler(void) {
 }
 
 void loop() {
-  timer++;
-  scheduler();
-  delay(1); // gonna need to make our own
+  if (isr_flag == TICK) {
+    timer++;
+    scheduler();
+    isr_flag = NON_TICK;
+  }
+  // delay(1)
 }

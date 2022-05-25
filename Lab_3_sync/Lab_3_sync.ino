@@ -52,8 +52,9 @@ void setup() {
   taskPointers[1] = task2;
   taskPointers[2] = NULL;
   
-  DDRA = 0b00011110;
-  DDRC = 0xFF;
+  // DDRA = 0b00011110;
+  // DDRC = 0xFF;
+  DDRL |= 1 << DDL2;
   
   noInterrupts();
   TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
@@ -72,7 +73,7 @@ void task1(void) {
     state[task_index] = RUNNING; 
     if (timer % 1000 == 0) {
       PORTL |= 1 << PORTL2;
-    } 
+    }
     if (timer % 1250 == 0) {
       PORTL &= ~(1 << PORTL2);
     }
@@ -137,6 +138,7 @@ void scheduler(void) {
 }
 
 void loop() {
+  timer++;
   scheduler();
   delay(1); // gonna need to make our own
 }

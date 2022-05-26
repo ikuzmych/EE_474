@@ -122,7 +122,7 @@ ISR(TIMER3_COMPA_vect) {
  * Playing a song for Task 2...
  */
 void task2(void) {
- if (TASKS[task_index].state != SLEEPING) {
+ if (TASKS[task_index].state == READY) {
     TASKS[task_index].state = RUNNING;   
     OCR4A = melody[curr];
     TASKS[task_index + 1].state = SLEEPING;

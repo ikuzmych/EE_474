@@ -4,12 +4,6 @@
 #define NOTE_4 16000000 / (2 * 130) - 1
 #define NOTE_5 16000000 / (2 * 196) - 1
 #define NOTE_rest 0
-#define freq1 293
-#define freq2 329
-#define freq3 261
-#define freq4 130
-#define freq5 196
-#define freqR 0
 
 
 #define N_TASKS 5
@@ -23,10 +17,6 @@
 
 #define DELAY_TIMEOUT_VALUE 16000000 / (2 * 500) - 1
 
-
-void (*taskPointers[N_TASKS]) (void);
-int state[N_TASKS];
-int sleepingTime[N_TASKS]; // to keep track of how long each function needs to sleep, will constantly decrement
 volatile int sFlag = PENDING;
 byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b01100000, // 1
@@ -38,8 +28,7 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b11100000, // 7
                               0b11111110, // 8
                               0b11100110 }; // 9
-
-int frequencies[9] =  { freq1, freqR, freq2, freqR, freq3, freqR, freq4, freqR, freq5 };                              
+                           
 /**
  * Pin 30: A
  * Pin 31: B
@@ -62,7 +51,7 @@ int task_index = 0;
 // int sleep;
 unsigned long timer = 0;
 unsigned long counter = 30;
-
+int t2 = 0;
 typedef struct DDS {
   void (*id)(void);
   char taskName [20];
@@ -161,44 +150,29 @@ void task2(void) {
       curr++;
     }
     if ( curr == 9 ) {
-      TASKS[task_index].timesStarted++;
-      sleep_474 (2000);
+      TASKS[task_index].timesStarted += 1;
       curr = -1;
       OCR4A = 0;
       TASKS[task_index + 1].state = READY;
       counter = 30;
-      if (TASKS[task_index].timesStarted >= 2) {
-        task_self_quit();
-        task_start(&TASKS[2], task3);
+      if ( TASKS[task_index].timesStarted < 2) {
+        sleep_474(2000);
       }
+      else if (TASKS[task_index].timesStarted == 2) {
+        sleep_474 (1500);
+      } else if (TASKS[task_index].timesStarted > 2) {
+          task_self_quit();
+          task_start(&TASKS[2], task3);
+      } 
     } else {
       TASKS[task_index].state = READY;
-    }
-    if (timer % 4 == 0) {
-      PORTC = 0b00000000;
-      PORTA = 0b11111101;
-      PORTC = seven_seg_digits[(frequencies[curr]) % 10];
-    }
-    else if (timer % 4 == 1) {
-      PORTC = 0b00000000;
-      PORTA = 0b11111011;
-      PORTC = seven_seg_digits[(frequencies[curr] / 10) % 10];
-    }
-    else if (timer % 4 == 2) {     
-      PORTC = 0b00000000;
-      PORTA = 0b11110111;
-      PORTC = seven_seg_digits[(frequencies[curr] / 100) % 10];
-    }
-    else if (timer % 4 == 3) {
-      PORTC = 0b00000000;
-      PORTA = 0b11101111;
-      PORTC = seven_seg_digits[(frequencies[curr] / 1000) % 10];
     }
   }
   else {
     OCR4A = 0;
     curr = -1;
   }
+  return;
 }
 
 void task3 (void) {
@@ -206,7 +180,7 @@ void task3 (void) {
     TASKS[task_index].state = RUNNING;
     if (counter == 0) {
       task_start(&TASKS[1], task2); // start task 2
-      task_self_quit();
+      sleep_474(4500);
       TASKS[task_index].timesStarted++;
       counter = 20;
     }
@@ -233,9 +207,15 @@ void task3 (void) {
       PORTA = 0b11101111;
       PORTC = seven_seg_digits[(counter / 1000) % 10];
     }
-    TASKS[task_index].state = READY;
+    if (counter == 0) {
+      sleep_474 (4500);
+    } else {
+      TASKS[task_index].state = READY;
+    }
   } else if ((TASKS[task_index].state == READY) && (TASKS[1].timesStarted == 3)){
     if (counter == 0) {
+      PORTC = 0b00000000;
+      PORTA = 0b11100001;
       task_self_quit();
     }
     if (timer % (100 / 2) == 0) {
@@ -244,28 +224,31 @@ void task3 (void) {
     if (timer % 4 == 0) {
       PORTC = 0b00000000;
       PORTA = 0b11111101;
-      PORTC = 0b10100100; // first part of smiley face (right most)
+      PORTC = 0b01001010; // first part of smiley face (right most)
     }
     else if (timer % 4 == 1) {
       PORTC = 0b00000000;
       PORTA = 0b11111011;
-      PORTC = 0b00010010;
+      PORTC = 0b10010000;
     }
     else if (timer % 4 == 2) {     
       PORTC = 0b00000000;
       PORTA = 0b11110111;
-      PORTC = 0b00010010;
+      PORTC = 0b10010000;
     }
     else if (timer % 4 == 3) {
       PORTC = 0b00000000;
       PORTA = 0b11101111;
-      PORTC = 0b11001000;
+      PORTC = 0b00100110;
     }
     
-  } else {
-  //  TASKS[task_index].state = READY;
-    PORTA = 0b11111111;
+  } 
+  else {
+    TASKS[task_index].state = READY;
+    PORTC = 0b00000000;
+    PORTA = 0b00011110;
   }
+  return;
 }
 
 
@@ -277,11 +260,13 @@ void start_function(void (*functionPtr) () ) {
 void task_start(DDS *task, void (*functionPtr) () ) {
   task->id = functionPtr;
   task->state = READY;
+  return;
 }
 
 void task_self_quit(void) {
-  TASKS[task_index].id = NULL;
+//  TASKS[task_index].id = NULL;
   TASKS[task_index].state = DEAD;
+  return;
 }
 
 void sleep_474 (int t) {
@@ -297,21 +282,19 @@ void schedule_sync(void) {
       if (TASKS[k].sleepTime > 0) {
         TASKS[k].sleepTime -= 1;
       }
-      if (TASKS[k].sleepTime <= 0) {
+      if (TASKS[k].sleepTime <= 0 && TASKS[k].state == SLEEPING) {
         TASKS[k].state = READY;
       }
     }
   }
+ // timer++;
   sFlag = PENDING;
   return;
 }
 
 
 void scheduler(void) {
-  if ((TASKS[task_index].id == NULL) && (task_index >= N_TASKS)) {
-    task_index = 0;
-  }
-  if (task_index > (N_TASKS - 1)) { // just in case above one fails
+  if ((TASKS[task_index].id == NULL) && (task_index >= N_TASKS - 1)) {
     task_index = 0;
   }
   if (TASKS[task_index].id == NULL) {
@@ -324,6 +307,7 @@ void scheduler(void) {
 
 void loop() {
   if (sFlag == DONE) {
+//    timer++;
     scheduler();
     sFlag = PENDING; // reset the interrupt flag
   }

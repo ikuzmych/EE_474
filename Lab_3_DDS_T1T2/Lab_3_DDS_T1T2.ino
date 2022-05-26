@@ -8,11 +8,13 @@
 #define READY 0
 #define RUNNING 1
 #define SLEEPING 2
+#define DEAD 3
 
 #define PENDING 0
 #define DONE 1
 
 #define DELAY_TIMEOUT_VALUE 16000000 / (2 * 500) - 1
+
 
 void (*taskPointers[N_TASKS]) (void);
 int state[N_TASKS];
@@ -46,20 +48,49 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
 
 /* array defining all the frequencies of the melody  */
 long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
-int curr = 0;
-int task_index;
+int curr = -1;
+int task_index = 0;
 // int sleep;
-unsigned long timer;
+unsigned long timer = 0;
 unsigned long counter = 0;
 
+typedef struct DDS {
+  void (*id)(void);
+  char taskName [20];
+  int state;
+  unsigned int sleepTime;
+  unsigned int timesStarted;
+} DDS;
+
+DDS TASKS [N_TASKS];
+
 void setup() {
-  taskPointers[0] = task1;
-  taskPointers[1] = task2;
-  taskPointers[2] = schedule_sync;
-  taskPointers[3] = NULL;
+  TASKS[0].id = task1;
+  strcpy(TASKS[0].taskName, "Blinking Light     ");
+  TASKS[0].state = READY;
+  TASKS[0].sleepTime = 0;
+  TASKS[0].timesStarted = 0;
+
+  TASKS[1].id = task2;
+  strcpy(TASKS[1].taskName, "Close Encounters   ");
+  TASKS[1].state = READY;
+  TASKS[1].sleepTime = 0;
+  TASKS[1].timesStarted = 0;
+
+  TASKS[2].id = schedule_sync;
+  strcpy(TASKS[2].taskName, "Schedule Sync      ");
+  TASKS[2].state = READY;
+  TASKS[2].sleepTime = 0;
+  TASKS[2].timesStarted = 0;
+
+  TASKS[3].id = NULL;
+//  TASKS[3].taskName = "NULL               ";
+//  TASKS[3].state = NULL;
+//  TASKS[3].sleepTime = NULL;
+//  TASKS[3].timesStarted = NULL;
   
-  // DDRA = 0b00011110;
-  // DDRC = 0xFF;
+  DDRA = 0b00011110;
+  DDRC = 0xFF;
   DDRL |= 1 << DDL2;
   
   noInterrupts();
@@ -83,18 +114,18 @@ ISR(TIMER3_COMPA_vect) {
 
 int x = 0;
 void task1(void) {
- if (state[task_index] != SLEEPING) {
-    state[task_index] = RUNNING; 
-    if (x < 125) {
+ if (TASKS[task_index].state != SLEEPING) {
+    TASKS[task_index].state = RUNNING; 
+    if (x < (250 / 2)) {
       PORTL |= 1 << PORTL2;
     } else {
       PORTL &= ~(1 << PORTL2);    
     }
-    state[task_index] = READY;
+    TASKS[task_index].state = READY;
  } else {
-    state[task_index] = READY;
+    TASKS[task_index].state = READY;
  }
-  if (x == 500) {
+  if (x == (1000 / 2)) {
     x = 0;
   }
   x++;
@@ -105,28 +136,29 @@ void task1(void) {
  * Playing a song for Task 2...
  */
 void task2(void) {
- if (state[task_index] != SLEEPING) {
-    state[task_index] = RUNNING;   
+ if (TASKS[task_index].state != SLEEPING) {
+    TASKS[task_index].state = RUNNING;   
     OCR4A = melody[curr];
-    if (timer % 500 == 0 && !(melody[curr] == NOTE_rest)) {
+    if (timer % (1000 / 2) == 0 && (melody[curr] != NOTE_rest)) {
       curr++;
     }
-    else if ((melody[curr] == NOTE_rest) && (timer % 1000 == 0)) {
+    else if ((melody[curr] == NOTE_rest) && (timer % (2000 / 2) == 0)) {
       curr++;
     }
     if ( curr == 9 ) {
-      sleep_474 (1250);
-      curr = 0;
+      sleep_474 (2000);
+      curr = -1;
       OCR4A = 0;
     } else {
-      state[task_index] = READY;
+      TASKS[task_index].state = READY;
     }
   }
   else {
     OCR4A = 0;
-    curr = 0;
+    curr = -1;
   }
 }
+
 
 void start_function(void (*functionPtr) () ) {
   functionPtr(); // runs the function that was passed down
@@ -134,22 +166,23 @@ void start_function(void (*functionPtr) () ) {
 }
  
 void sleep_474 (int t) {
-  state[task_index] = SLEEPING; // change the state of the current task to sleep
-  sleepingTime[task_index] = t;
+  TASKS[task_index].state =  SLEEPING; // change the state of the current task to sleep
+  TASKS[task_index].sleepTime = t;
   return;
 }
 
 
 void schedule_sync(void) {
-  while (sFlag == PENDING) {
-    
-  }
-  for (int k = 0; k < task_index; k++) {
-    if (sleepingTime[k] > 0) {
-      sleepingTime[k]--;
-    }
-    if (sleepingTime[k] <= 0) {
-      state[k] = READY;
+
+  if (sFlag != PENDING) {
+    timer++;
+    for (int k = 0; k < N_TASKS; k++) {
+      if (TASKS[k].sleepTime > 0) {
+        TASKS[k].sleepTime -= 1;
+      }
+      if (TASKS[k].sleepTime <= 0) {
+        TASKS[k].state = READY;
+      }
     }
   }
   sFlag = PENDING;
@@ -157,22 +190,23 @@ void schedule_sync(void) {
 }
 
 
-
 void scheduler(void) {
-  if ((taskPointers[task_index] == NULL) && (task_index != 0)) {
+  if ((TASKS[task_index].id == NULL) && (task_index != 0)) {
     task_index = 0;
   }
-  if (task_index > 3) { // just in case above one fails
+  if (task_index > (N_TASKS - 1)) { // just in case above one fails
     task_index = 0;
   }
-  start_function(taskPointers[task_index]);
+//  if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
+//    // end;
+//  }
+  start_function(TASKS[task_index].id);
   task_index++;
   return;
 }
 
 void loop() {
   if (sFlag == DONE) {
-    timer++;
     scheduler();
     sFlag = PENDING; // reset the interrupt flag
   }

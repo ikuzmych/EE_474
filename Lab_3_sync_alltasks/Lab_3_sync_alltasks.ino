@@ -50,7 +50,7 @@ long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_
 int curr = 0;
 int task_index;
 // int sleep;
-unsigned long timer;
+unsigned long timer = 0;
 unsigned long counter = 0;
 
 void setup() {
@@ -116,7 +116,7 @@ void task2(void) {
       curr++;
     }
     if ( curr == 9 ) {
-      sleep_474 (4000 / 2);
+      sleep_474 (2000);
       curr = 0;
       OCR4A = 0;
     } else {
@@ -128,7 +128,7 @@ void task2(void) {
     curr = 0;
     sleepingTime[task_index]--;
   }
-  if (sleepingTime[task_index] == 0) {
+  if (sleepingTime[task_index] < 1) {
     state[task_index] = READY;
   }
 }
@@ -136,7 +136,7 @@ void task2(void) {
 void task3 (void) {
   if (state[task_index] != SLEEPING) {
     state[task_index] = RUNNING;
-    if (timer % 100 == 0) counter++;
+    if (timer % (100 / 2) == 0) counter++;
     
     if (timer % 4 == 0) {
       PORTC = 0b00000000;
@@ -196,7 +196,7 @@ void scheduler(void) {
 
 void loop() {
   if (isr_flag == DONE) {
-    timer++;
+    timer ++;
     scheduler();
     isr_flag = NOT_DONE; // reset the interrupt flag
   }

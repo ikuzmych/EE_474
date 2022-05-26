@@ -28,7 +28,6 @@ void (*taskPointers[N_TASKS]) (void);
 int state[N_TASKS];
 int sleepingTime[N_TASKS]; // to keep track of how long each function needs to sleep, will constantly decrement
 volatile int sFlag = PENDING;
-
 byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b01100000, // 1
                               0b11011010, // 2
@@ -40,7 +39,7 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b11111110, // 8
                               0b11100110 }; // 9
 
-long frequencies[9] =  { freq1, freqR, freq2, freqR, freq3, freqR, freq4, freqR, freq5 };                              
+int frequencies[9] =  { freq1, freqR, freq2, freqR, freq3, freqR, freq4, freqR, freq5 };                              
 /**
  * Pin 30: A
  * Pin 31: B
@@ -62,7 +61,7 @@ int curr = -1;
 int task_index = 0;
 // int sleep;
 unsigned long timer = 0;
-unsigned long counter = 0;
+unsigned long counter = 40;
 
 typedef struct DDS {
   void (*id)(void);
@@ -94,10 +93,6 @@ void setup() {
   TASKS[2].timesStarted = 0;
 
   TASKS[3].id = NULL;
-//  TASKS[3].taskName = "NULL               ";
-//  TASKS[3].state = NULL;
-//  TASKS[3].sleepTime = NULL;
-//  TASKS[3].timesStarted = NULL;
   
   DDRA = 0b00011110;
   DDRC = 0xFF;
@@ -130,6 +125,7 @@ void task2(void) {
  if (TASKS[task_index].state != SLEEPING) {
     TASKS[task_index].state = RUNNING;   
     OCR4A = melody[curr];
+    TASKS[task_index + 1].state = SLEEPING;
     if (timer % (1000 / 2) == 0 && (melody[curr] != NOTE_rest)) {
       curr++;
     }
@@ -140,8 +136,30 @@ void task2(void) {
       sleep_474 (2000);
       curr = -1;
       OCR4A = 0;
+      TASKS[task_index + 1].state = READY;
+      counter = 40;
     } else {
       TASKS[task_index].state = READY;
+    }
+    if (timer % 4 == 0) {
+      PORTC = 0b00000000;
+      PORTA = 0b11111101;
+      PORTC = seven_seg_digits[(frequencies[curr]) % 10];
+    }
+    else if (timer % 4 == 1) {
+      PORTC = 0b00000000;
+      PORTA = 0b11111011;
+      PORTC = seven_seg_digits[(frequencies[curr] / 10) % 10];
+    }
+    else if (timer % 4 == 2) {     
+      PORTC = 0b00000000;
+      PORTA = 0b11110111;
+      PORTC = seven_seg_digits[(frequencies[curr] / 100) % 10];
+    }
+    else if (timer % 4 == 3) {
+      PORTC = 0b00000000;
+      PORTA = 0b11101111;
+      PORTC = seven_seg_digits[(frequencies[curr] / 1000) % 10];
     }
   }
   else {
@@ -151,9 +169,9 @@ void task2(void) {
 }
 
 void task3 (void) {
-  if (state[task_index] != SLEEPING) {
-    state[task_index] = RUNNING;
-    if (timer % (100 / 2) == 0) counter++;
+  if (TASKS[task_index].state != SLEEPING) {
+    TASKS[task_index].state = RUNNING;
+    if (timer % (100 / 2) == 0) counter--;
     
     if (timer % 4 == 0) {
       PORTC = 0b00000000;
@@ -176,9 +194,9 @@ void task3 (void) {
       PORTA = 0b11101111;
       PORTC = seven_seg_digits[(counter / 1000) % 10];
     }
-    state[task_index] = READY;
+    TASKS[task_index].state = READY;
   } else {
-    state[task_index] = READY;
+  //  TASKS[task_index].state = READY;
     PORTA = 0b11111111;
   }
 }
@@ -221,9 +239,7 @@ void scheduler(void) {
   if (task_index > (N_TASKS - 1)) { // just in case above one fails
     task_index = 0;
   }
-//  if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
-//    // end;
-//  }
+
   start_function(TASKS[task_index].id);
   task_index++;
   return;

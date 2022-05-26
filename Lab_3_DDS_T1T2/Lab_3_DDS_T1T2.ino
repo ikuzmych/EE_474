@@ -166,7 +166,7 @@ void start_function(void (*functionPtr) () ) {
 }
  
 void sleep_474 (int t) {
-  TASKS[task_index].state =  SLEEPING; // change the state of the current task to sleep
+  TASKS[task_index].state = SLEEPING; // change the state of the current task to sleep
   TASKS[task_index].sleepTime = t;
   return;
 }

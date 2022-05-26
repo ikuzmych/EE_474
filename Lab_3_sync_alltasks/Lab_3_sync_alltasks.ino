@@ -18,7 +18,7 @@
 void (*taskPointers[N_TASKS]) (void);
 int state[N_TASKS];
 int sleepingTime[N_TASKS]; // to keep track of how long each function needs to sleep, will constantly decrement
-volatile byte isr_flag;
+volatile byte isr_flag = NOT_DONE;
 
 byte seven_seg_digits[10] = { 0b11111100, // 0
                               0b01100000, // 1
@@ -48,7 +48,7 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
 /* array defining all the frequencies of the melody  */
 long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
 int curr = 0;
-int task_index;
+int task_index = 0;
 // int sleep;
 unsigned long timer = 0;
 unsigned long counter = 0;
@@ -108,15 +108,15 @@ void task1(void) {
 void task2(void) {
  if (state[task_index] != SLEEPING) {
     state[task_index] = RUNNING;   
-    OCR4A = melody[curr % 9];
-    if (timer % (1000 / 2) == 0 && !(melody[curr % 9] == NOTE_rest)) {
+    OCR4A = melody[curr];
+    if (timer % (1000 / 2) == 0 && !(melody[curr] == NOTE_rest)) {
       curr++;
     }
-    else if ((melody[curr % 9] == NOTE_rest) && (timer % (2000 / 2) == 0)) {
+    else if ((melody[curr] == NOTE_rest) && (timer % (2000 / 2) == 0)) {
       curr++;
     }
     if ( curr == 9 ) {
-      sleep_474 (2000);
+      sleep_474 (1500);
       curr = 0;
       OCR4A = 0;
     } else {

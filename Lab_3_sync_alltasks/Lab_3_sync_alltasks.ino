@@ -117,8 +117,8 @@ void task2(void) {
       curr++;
     }
     if ( curr == 9 ) {
-      sleep_474 (900);
-      curr = 0;
+      sleep_474 (2000);
+      curr = -1;
       OCR4A = 0;
     } else {
       state[task_index] = READY;
@@ -126,7 +126,7 @@ void task2(void) {
   }
   else {
     OCR4A = 0;
-    curr = 0;
+    curr = -1;
   }
 }
 

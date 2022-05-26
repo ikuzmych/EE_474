@@ -9,8 +9,8 @@
 #define RUNNING 1
 #define SLEEPING 2
 
-#define NON_TICK 0
-#define TICK 1
+#define NOT_DONE 0
+#define DONE 1
 
 #define DELAY_TIMEOUT_VALUE 16000000 / (2 * 500) - 1
 
@@ -79,26 +79,9 @@ void setup() {
 }
 
 ISR(TIMER3_COMPA_vect) {
-    isr_flag = TICK;
+    isr_flag = DONE;
 }
 
-/** 
- *  Simple pattern of turning on LED for 
- *  250 ms, off for 750 ms, then repeating
- */
-/* 
-void task1(void) {
- if (state[task_index] != SLEEPING) {
-    state[task_index] = RUNNING; 
-    if (timer % 1000 == 0) {
-      PORTL |= 1 << PORTL2;
-    }
-    if (timer % 1250 == 0) {
-      PORTL &= ~(1 << PORTL2);
-    }
-    state[task_index] = READY;
- } else state[task_index] = READY;
-} */
 int x = 0;
 void task1(void) {
  if (state[task_index] != SLEEPING) {
@@ -151,7 +134,8 @@ void task2(void) {
 }
 
 void task3 (void) {
-  if (// using the sleeping/resting logic) {
+  if (state[task_index] != SLEEPING) {
+    state[task_index] = RUNNING;
     if (timer % 100 == 0) counter++;
     
     if (timer % 4 == 0) {
@@ -175,7 +159,9 @@ void task3 (void) {
       PORTA = 0b11101111;
       PORTC = seven_seg_digits[(counter / 1000) % 10];
     }
+    state[task_index] = READY;
   } else {
+    state[task_index] = READY;
     PORTA = 0b11111111;
   }
 }
@@ -197,7 +183,7 @@ void scheduler(void) {
   if ((taskPointers[task_index] == NULL) && (task_index != 0)) {
     task_index = 0;
   }
-  if (task_index > NUM_TASKS) { // just in case above one fails
+  if (task_index > N_TASKS) { // just in case above one fails
     task_index = 0;
   }
 //  if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
@@ -209,10 +195,10 @@ void scheduler(void) {
 }
 
 void loop() {
-  if (isr_flag == TICK) {
+  if (isr_flag == DONE) {
     timer++;
     scheduler();
-    isr_flag = NON_TICK; // reset the interrupt flag
+    isr_flag = NOT_DONE; // reset the interrupt flag
   }
   
   // delay(1)

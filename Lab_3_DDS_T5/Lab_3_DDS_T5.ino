@@ -244,7 +244,6 @@ void task3 (void) {
     
   } 
   else {
-    TASKS[task_index].state = READY;
     PORTC = 0b00000000;
     PORTA = 0b00011110;
   }

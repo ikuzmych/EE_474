@@ -54,10 +54,11 @@ unsigned long timer = 0;
 unsigned long counter = 0;
 
 void setup() {
-  taskPointers[0] = task1;
-  taskPointers[1] = task2;
-  taskPointers[2] = task3;
-  taskPointers[3] = NULL;
+  taskPointers[0] = schedule_sync;
+  taskPointers[1] = task1;
+  taskPointers[2] = task2;
+  taskPointers[3] = task3;
+  taskPointers[4] = NULL;
   
   DDRA = 0b00011110;
   DDRC = 0xFF;
@@ -109,14 +110,14 @@ void task2(void) {
  if (state[task_index] != SLEEPING) {
     state[task_index] = RUNNING;   
     OCR4A = melody[curr];
-    if (timer % (1000 / 2) == 0 && !(melody[curr] == NOTE_rest)) {
+    if (timer % (1000 / 2) == 0 && (melody[curr] != NOTE_rest)) {
       curr++;
     }
     else if ((melody[curr] == NOTE_rest) && (timer % (2000 / 2) == 0)) {
       curr++;
     }
     if ( curr == 9 ) {
-      sleep_474 (1500);
+      sleep_474 (900);
       curr = 0;
       OCR4A = 0;
     } else {
@@ -177,15 +178,16 @@ void sleep_474 (int t) {
 
 
 void schedule_sync(void) {
-  while (sFlag == PENDING) {
-    
-  }
-  for (int k = 0; k < task_index; k++) {
-    if (sleepingTime[k] > 0) {
-      sleepingTime[k]--;
-    }
-    if (sleepingTime[k] <= 0) {
-      state[k] = READY;
+
+  if (sFlag != PENDING) {
+    timer++;
+    for (int k = 0; k < N_TASKS; k++) {
+      if (sleepingTime[k] > 0) {
+        sleepingTime[k] -= 1;
+      }
+      if (sleepingTime[k] <= 0) {
+        state[k] = READY;
+      }
     }
   }
   sFlag = PENDING;
@@ -197,7 +199,7 @@ void scheduler(void) {
   if ((taskPointers[task_index] == NULL) && (task_index != 0)) {
     task_index = 0;
   }
-  if (task_index > 4) { // just in case above one fails
+  if (task_index > (N_TASKS - 1)) { // just in case above one fails
     task_index = 0;
   }
 //  if ((taskPointers[task_index] == NULL) && (task_index == 0)) {
@@ -210,7 +212,6 @@ void scheduler(void) {
 
 void loop() {
   if (sFlag == DONE) {
-    timer ++;
     scheduler();
     sFlag = PENDING; // reset the interrupt flag
   }

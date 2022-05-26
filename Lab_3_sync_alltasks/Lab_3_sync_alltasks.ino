@@ -86,7 +86,7 @@ int x = 0;
 void task1(void) {
  if (state[task_index] != SLEEPING) {
     state[task_index] = RUNNING; 
-    if (x < 250) {
+    if (x < (250 / 2)) {
       PORTL |= 1 << PORTL2;
     } else {
       PORTL &= ~(1 << PORTL2);    
@@ -95,7 +95,7 @@ void task1(void) {
  } else {
     state[task_index] = READY;
  }
-  if (x == 1000) {
+  if (x == (1000 / 2)) {
     x = 0;
   }
   x++;
@@ -109,14 +109,14 @@ void task2(void) {
  if (state[task_index] != SLEEPING) {
     state[task_index] = RUNNING;   
     OCR4A = melody[curr % 9];
-    if (timer % 1000 == 0 && !(melody[curr % 10] == NOTE_rest)) {
+    if (timer % (1000 / 2) == 0 && !(melody[curr % 9] == NOTE_rest)) {
       curr++;
     }
-    else if ((melody[curr % 9] == NOTE_rest) && (timer % 2000 == 0)) {
+    else if ((melody[curr % 9] == NOTE_rest) && (timer % (2000 / 2) == 0)) {
       curr++;
     }
     if ( curr == 9 ) {
-      sleep_474 (2000);
+      sleep_474 (4000 / 2);
       curr = 0;
       OCR4A = 0;
     } else {

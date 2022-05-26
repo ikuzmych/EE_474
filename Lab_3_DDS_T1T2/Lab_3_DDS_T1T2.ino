@@ -210,6 +210,4 @@ void loop() {
     scheduler();
     sFlag = PENDING; // reset the interrupt flag
   }
-  
-  // delay(1)
 }

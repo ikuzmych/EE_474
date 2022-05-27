@@ -153,16 +153,19 @@ void task2(void) {
       TASKS[task_index].timesStarted += 1;
       curr = -1;
       OCR4A = 0;
-      TASKS[task_index + 1].state = READY;
+ //     TASKS[task_index + 1].state = READY;
       counter = 30;
       if ( TASKS[task_index].timesStarted < 2) {
         sleep_474(2000);
       }
       else if (TASKS[task_index].timesStarted == 2) {
-        sleep_474 (1500);
+//        sleep_474 (1500);
+             counter = 30;
+             task_self_quit();
       } else if (TASKS[task_index].timesStarted > 2) {
           task_self_quit();
           task_start(&TASKS[2], task3);
+          counter = 20;
       } 
     } else {
       TASKS[task_index].state = READY;
@@ -178,14 +181,10 @@ void task2(void) {
 void task3 (void) {
   if ((TASKS[task_index].state == READY) && (TASKS[1].timesStarted == 2)) {
     TASKS[task_index].state = RUNNING;
-    if (counter == 0) {
-      task_start(&TASKS[1], task2); // start task 2
-      sleep_474(4500);
-      TASKS[task_index].timesStarted++;
-      counter = 20;
-    }
+ 
     if (timer % (100 / 2) == 0) counter--;
     
+ 
     if (timer % 4 == 0) {
       PORTC = 0b00000000;
       PORTA = 0b11111101;
@@ -208,10 +207,14 @@ void task3 (void) {
       PORTC = seven_seg_digits[(counter / 1000) % 10];
     }
     if (counter == 0) {
-      sleep_474 (4500);
+      task_start(&TASKS[1], task2); // start task 2
+ //    sleep_474(4500);
+      task_self_quit();   
+      TASKS[task_index].timesStarted++;
+      counter = 20;
     } else {
-      TASKS[task_index].state = READY;
-    }
+       TASKS[task_index].state = READY;
+    } 
   } else if ((TASKS[task_index].state == READY) && (TASKS[1].timesStarted == 3)){
     if (counter == 0) {
       PORTC = 0b00000000;
@@ -257,7 +260,7 @@ void start_function(void (*functionPtr) () ) {
 }
 
 void task_start(DDS *task, void (*functionPtr) () ) {
-  task->id = functionPtr;
+//  task->id = functionPtr;
   task->state = READY;
   return;
 }

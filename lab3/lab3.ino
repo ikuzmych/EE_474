@@ -4,6 +4,9 @@
 #define NOTE_4 16000000 / (2 * 130) - 1
 #define NOTE_5 16000000 / (2 * 196) - 1
 #define NOTE_rest 0
+#define DELAY_TIMEOUT_VALUE 16000000 / (2 * 500) - 1
+#define DONE 1
+#define PENDING 0
 
 
 byte seven_seg_digits[10] = { 0b11111100, // 0
@@ -32,12 +35,12 @@ byte seven_seg_digits[10] = { 0b11111100, // 0
  */
 
 /* array defining all the frequencies of the melody  */
-int melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
+long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5, NOTE_rest };
 int curr = 0;
 int sleep;
 unsigned long timer;
 unsigned long counter = 0;
-
+volatile int sFlag = PENDING;
 void setup() {
 
   DDRA = 0b00011110;
@@ -47,21 +50,36 @@ void setup() {
   TCCR4A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
   TCCR4B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
   DDRH |= 1 << DDH3; // pin 6
+
+  /* for the delay timer */
+  TCCR3A = B01010100; // bottom two bits 0 (WGMn1 & WGMn0)
+  TCCR3B = B00001001; // 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select (prescaler of 1), clear timer on compare
+  TIMSK3 = B00000010; // enable compare match interrupt for TIMER3
+  OCR3A = DELAY_TIMEOUT_VALUE;
   interrupts();
   
+}
+
+ISR(TIMER3_COMPA_vect) {
+  sFlag = DONE;
 }
 
 /** 
  *  Simple pattern of turning on LED for 
  *  250 ms, off for 750 ms, then repeating
  */
+int x = 0;
 void task1(int on) {
-  if (timer % 1000 == 0) {
+  if (x < 250) {
     PORTL |= 1 << PORTL2;
-  } 
-  if (timer % 1250 == 0) {
+  } else {
     PORTL &= ~(1 << PORTL2);
   }
+  if (x == 1000) {
+    x = 0;
+  }
+  x++;
+  return;
 }
 
 /**
@@ -89,6 +107,7 @@ void task2(int on) {
   if (sleep == 1 && timer % 6000 == 0) {
     sleep = 0;
   }
+  return;
 }
 
 void task3 (int on) {
@@ -119,13 +138,16 @@ void task3 (int on) {
   } else {
     PORTA = 0b11111111;
   }
+  return;
 }
 
 
 void loop() {
-  timer++;
-  task1(1);
-  task2(1);
-  task3(1);
-  delay(1);
+  if (sFlag == DONE) {
+    timer++; 
+    task1(1);
+    task2(1);
+    task3(1);
+    sFlag = PENDING;   
+  }
 }

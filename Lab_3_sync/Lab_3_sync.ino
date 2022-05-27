@@ -37,7 +37,7 @@
 #define DONE 1                             ///< Define for ISR to indicate time has incrimented
 
 /// For OCRA3 to overflow every 2 ms and to trigger the interupt
-#define DELAY_TIMEOUT_VALUE 16000000 / (2 * 500) - 1
+#define DELAY_TIMEOUT_VALUE 16000000 / (3 * 500) - 1
 
 
 void (*taskPointers[N_TASKS]) (void);     ///< Array of function pointers for the scheduler

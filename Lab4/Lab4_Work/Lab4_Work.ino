@@ -12,9 +12,12 @@
 void RT1( void *pvParameters );
 void RT2( void *pvParameters );
 void RT3p0(void *pvParameters);
+void RT3p1(void *pvParameters);
 
 TaskHandle_t TaskRT2_Handler;
 TaskHandle_t TaskRT3p0_Handler;
+TaskHandle_t TaskRT3p1_Handler;
+
 
 /// array defining all the frequencies of the melody
 long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
@@ -22,16 +25,6 @@ uint8_t curr = 0;
 int timesRun = 0;
 int N = 20;
 int* nPointer = &N;
-
-
-
-
-////////////////////////////////////////////////
-// APPROVED FOR ECE 474   Spring 2021
-//
-//  NOTE: modify analogRead() on line 113 according
-//   to your setup.
-////////////////////////////////////////////////
 
 
 
@@ -68,7 +61,18 @@ void setup() {
     ,  nPointer
     ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  &TaskRT3p0_Handler ); 
-  
+
+
+  xTaskCreate(
+    RT3p1
+    ,  "RT3p1"   // A name just for humans
+    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  NULL
+    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  &TaskRT3p1_Handler ); 
+
+
+    
   // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
   //  (note how the above comment is WRONG!!!)
   vTaskStartScheduler();
@@ -119,7 +123,12 @@ void RT2(void *pvParameters)  // This is a task.
   }
 }
 
+
+
+QueueHandle_t xQueue;
+
 void RT3p0(void *pvParameters) {
+  
   int arraysize = &pvParameters;
 
   double arrayOfData[arraysize];
@@ -127,6 +136,11 @@ void RT3p0(void *pvParameters) {
   for (int i = 0; i < arraysize; i++) {
     arrayOfData[i] = (double) (random(0, 5000)); 
   }
-  xQueueCreate(arraysize, sizeof (double) );
+  xQueue = xQueueCreate(arraysize, sizeof (double) );
   vTaskSuspend(TaskRT3p0_Handler);
+  vTaskResume(TaskRT3p1_Handler);
+}
+
+void RT3p1(void *pvParameters) {
+
 }

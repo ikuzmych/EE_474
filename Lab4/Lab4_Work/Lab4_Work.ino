@@ -11,11 +11,10 @@
 // define 3 tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec ) and for RT3
 void RT1( void *pvParameters );
 void RT2( void *pvParameters );
-void RT3p0(int *nPointer);
+void RT3p0(void* parameter);
 void RT3p1(void *pvParameters);
+void RT4(void *pvParameters);
 
-TaskHandle_t TaskRT2_Handler;
-// TaskHandle_t TaskRT3p0_Handler;
 TaskHandle_t TaskRT3p1_Handler;
 
 
@@ -23,7 +22,9 @@ TaskHandle_t TaskRT3p1_Handler;
 long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
 uint8_t curr = 0;
 int timesRun = 0;
-int N = 20;
+int N = 64;
+
+int amplitude = 50;
 // int* nPointer = &N;
 
 
@@ -65,6 +66,14 @@ void setup() {
   xTaskCreate(
     RT3p1
     ,  "RT3p1"   // A name just for humans
+    ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  NULL
+    ,  0  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  &TaskRT3p1_Handler ); 
+
+  xTaskCreate(
+    RT4
+    ,  "RT4"   // A name just for humans
     ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
     ,  0  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
@@ -124,27 +133,52 @@ void RT2(void *pvParameters)  // This is a task.
 
 
 
-QueueHandle_t xQueue;
+QueueHandle_t xQueue1, xQueue2;
+arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
 
 void RT3p0(void *parameter) {
   
   int arraysize = *((int*) parameter);
 
+  double (*p)[arraysize];
   double arrayOfData[arraysize];
 
   for (int i = 0; i < arraysize; i++) {
     arrayOfData[i] = (double) (random(5000)); 
   }
-  xQueue = xQueueCreate(arraysize, sizeof (double) );
   
-  for (int j = 0; j < arraysize; j++) {
-    xQueueSend(xQueue, &arrayOfData[j], 0);
-  }
+  p = &arrayOfData;
+  xQueue1 = xQueueCreate(2, sizeof (double) );
+  xQueue2 = xQueueCreate(2, sizeof (int) );
+  
+  
+
   
   vTaskSuspend(NULL);
   vTaskResume(TaskRT3p1_Handler);
 }
 
 void RT3p1(void *pvParameters) {
+  xQueueSend(xQueue1, p, 0);
+  
   vTaskSuspend(NULL);
+}
+
+
+
+void RT4(void *pvParameters) {
+  
+  for (;;) {
+    for (int i = 0; i < 5; i++) {
+      int arr[N];
+      xQueueReceive(xQueue1, &arr[N], 0);
+      for (int j = 0; j < N; j++) {
+        vReal[j] = arr[j]; /* Build data with positive and negative values*/
+        vImag[j] = 0.0; // imaginary part
+      }
+      FFT.compute(
+    }
+    
+    vTaskSuspend(NULL);
+  }
 }

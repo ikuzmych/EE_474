@@ -53,23 +53,22 @@ void setup() {
     ,  NULL
     ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
-//  
-//  xTaskCreate(
-//    RT3p0
-//    ,  "RT3p0"   // A name just for humans
-//    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
-//    ,  (void*)&N
-//    ,  0  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-//    ,  NULL ); 
-//
-//
-//  xTaskCreate(
-//    RT3p1
-//    ,  "RT3p1"   // A name just for humans
-//    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
-//    ,  NULL
-//    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-//    ,  NULL ); 
+
+  xTaskCreate(
+    RT3p0
+    ,  "RT3p0"   // A name just for humans
+    ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  (void*)&N
+    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL ); 
+
+  xTaskCreate(
+    RT3p1
+    ,  "RT3p1"   // A name just for humans
+    ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  NULL
+    ,  0  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL ); 
 
 
     
@@ -147,5 +146,5 @@ void RT3p0(void *parameter) {
 }
 
 void RT3p1(void *pvParameters) {
-
+  vTaskSuspend(NULL);
 }

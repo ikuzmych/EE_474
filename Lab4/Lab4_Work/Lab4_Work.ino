@@ -11,11 +11,11 @@
 // define 3 tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec ) and for RT3
 void RT1( void *pvParameters );
 void RT2( void *pvParameters );
-void RT3p0(void *pvParameters);
+void RT3p0(int *nPointer);
 void RT3p1(void *pvParameters);
 
 TaskHandle_t TaskRT2_Handler;
-TaskHandle_t TaskRT3p0_Handler;
+// TaskHandle_t TaskRT3p0_Handler;
 TaskHandle_t TaskRT3p1_Handler;
 
 
@@ -24,7 +24,7 @@ long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_
 uint8_t curr = 0;
 int timesRun = 0;
 int N = 20;
-int* nPointer = &N;
+// int* nPointer = &N;
 
 
 
@@ -43,7 +43,7 @@ void setup() {
     ,  "Blink"   // A name just for humans
     ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
-    ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
     
   xTaskCreate(
@@ -51,25 +51,25 @@ void setup() {
     ,  "Close Encounters of the Third Kind"   // A name just for humans
     ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
-    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  &TaskRT2_Handler );
-  
-  xTaskCreate(
-    RT3p0
-    ,  "RT3p0"   // A name just for humans
-    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
-    ,  nPointer
-    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  &TaskRT3p0_Handler ); 
-
-
-  xTaskCreate(
-    RT3p1
-    ,  "RT3p1"   // A name just for humans
-    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
-    ,  NULL
-    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  &TaskRT3p1_Handler ); 
+    ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL );
+//  
+//  xTaskCreate(
+//    RT3p0
+//    ,  "RT3p0"   // A name just for humans
+//    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
+//    ,  (void*)&N
+//    ,  0  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+//    ,  NULL ); 
+//
+//
+//  xTaskCreate(
+//    RT3p1
+//    ,  "RT3p1"   // A name just for humans
+//    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
+//    ,  NULL
+//    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+//    ,  NULL ); 
 
 
     
@@ -118,7 +118,7 @@ void RT2(void *pvParameters)  // This is a task.
       vTaskDelay( 1500 / portTICK_PERIOD_MS ); // wait for 1.5 second
     } else if (curr == 9) {
       OCR4A = 0;
-      vTaskSuspend(TaskRT2_Handler);
+      vTaskSuspend(NULL);
     }
   }
 }
@@ -127,17 +127,22 @@ void RT2(void *pvParameters)  // This is a task.
 
 QueueHandle_t xQueue;
 
-void RT3p0(void *pvParameters) {
+void RT3p0(void *parameter) {
   
-  int arraysize = &pvParameters;
+  int arraysize = *((int*) parameter);
 
   double arrayOfData[arraysize];
 
   for (int i = 0; i < arraysize; i++) {
-    arrayOfData[i] = (double) (random(0, 5000)); 
+    arrayOfData[i] = (double) (random(5000)); 
   }
   xQueue = xQueueCreate(arraysize, sizeof (double) );
-  vTaskSuspend(TaskRT3p0_Handler);
+  
+  for (int j = 0; j < arraysize; j++) {
+    xQueueSend(xQueue, &arrayOfData[j], 0);
+  }
+  
+  vTaskSuspend(NULL);
   vTaskResume(TaskRT3p1_Handler);
 }
 

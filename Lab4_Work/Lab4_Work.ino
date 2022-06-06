@@ -1,5 +1,22 @@
 #include <Arduino_FreeRTOS.h>
 
+#define NOTE_1 16000000 / (2 * 293) - 1    ///< to output 293 Hz to Pin 6
+#define NOTE_2 16000000 / (2 * 329) - 1    ///< to output 329 Hz to Pin 6
+#define NOTE_3 16000000 / (2 * 261) - 1    ///< to output 261 Hz to Pin 6
+#define NOTE_4 16000000 / (2 * 130) - 1    ///< to output 130 Hz to Pin 6
+#define NOTE_5 16000000 / (2 * 196) - 1    ///< to output 196 Hz to Pin 6
+#define NOTE_rest 0                        ///< to output 0 Hz to Pin 6
+
+
+/// array defining all the frequencies of the melody
+long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
+uint8_t curr = 0;
+int timesRun = 0;
+
+TaskHandle_t TaskRT2_Handler;
+
+
+
 ////////////////////////////////////////////////
 // APPROVED FOR ECE 474   Spring 2021
 //
@@ -7,42 +24,41 @@
 //   to your setup.
 ////////////////////////////////////////////////
 
-// define two tasks for Blink & AnalogRead
-void TaskBlink( void *pvParameters );
-void TaskAnalogRead( void *pvParameters );
+// define two tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec )
+void RT1( void *pvParameters );
+void RT2( void *pvParameters );
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  
-  // initialize serial communication at 9600 bits per second:
-  Serial.begin(19200);
-  
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB, on LEONARDO, MICRO, YUN, and other 32u4 based boards.
-  } 
 
-  // Now set up two tasks to run independently.
+  noInterrupts();
+    TCCR4A = B01010100; ///< bottom two bits 0 (WGM31 & WGM30)
+    TCCR4B = B00001001; ///< 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
+  interrupts();
+  DDRH |= 1 << DDH3; ///< pin 6
+  DDRL |= 1 << DDL2; ///< pin 47
+  
   xTaskCreate(
-    TaskBlink
+    RT1
     ,  "Blink"   // A name just for humans
     ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
     ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
-
+    
   xTaskCreate(
-    TaskAnalogRead
-    ,  "AnalogRead"
-    ,  128  // Stack size
+    RT2
+    ,  "Close Encounters of the Third Kind"   // A name just for humans
+    ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
-    ,  1  // Priority
-    ,  NULL );
-
+    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  &TaskRT2_Handler );
+  
+  
+  
   // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
   //  (note how the above comment is WRONG!!!)
   vTaskStartScheduler();
-
-
 }
 
 void loop()
@@ -54,65 +70,38 @@ void loop()
 /*---------------------- Tasks ---------------------*/
 /*--------------------------------------------------*/
 
-void TaskBlink(void *pvParameters)  // This is a task.
+void RT1(void *pvParameters)  // This is a task.
 {
  // (void) pvParameters;  // allocate stack space for params
 
-/*
-  Blink
-  Turns on an LED on for one second, then off for one second, repeatedly.
-
-  Most Arduinos have an on-board LED you can control. On the UNO, LEONARDO, MEGA, and ZERO 
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN takes care 
-  of use the correct LED pin whatever is the board used.
-  
-  The MICRO does not have a LED_BUILTIN available. For the MICRO board please substitute
-  the LED_BUILTIN definition with either LED_BUILTIN_RX or LED_BUILTIN_TX.
-  e.g. pinMode(LED_BUILTIN_RX, OUTPUT); etc.
-  
-  If you want to know what pin the on-board LED is connected to on your Arduino model, check
-  the Technical Specs of your board  at https://www.arduino.cc/en/Main/Products
-  
-  This example code is in the public domain.
-
-  modified 8 May 2014
-  by Scott Fitzgerald
-  
-  modified 2 Sep 2016
-  by Arturo Guadalupi
-*/
-
-  // initialize digital LED_BUILTIN on pin 13 as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
-
   for (;;) // A Task shall never return or exit.
   {
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    vTaskDelay( 250 / portTICK_PERIOD_MS ); // wait for one second
-    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+    PORTL |= 1 << PORTL2;   // turn the LED on (HIGH is the voltage level)
     vTaskDelay( 100 / portTICK_PERIOD_MS ); // wait for one second
+    PORTL &= ~(1 << PORTL2);    // turn the LED off by making the voltage LOW
+    vTaskDelay( 250 / portTICK_PERIOD_MS ); // wait for one second
   }
 }
 
-void TaskAnalogRead(void *pvParameters)  // This is a task.
+void RT2(void *pvParameters)  // This is a task.
 {
- // (void) pvParameters;
-  
-/*
-  AnalogReadSerial
-  Reads an analog input on pin 0, prints the result to the serial monitor.
-  Graphical representation is available using serial plotter (Tools > Serial Plotter menu)
-  Attach the center pin of a potentiometer to pin A0, and the outside pins to +5V and ground.
+ // (void) pvParameters;  // allocate stack space for params
 
-  This example code is in the public domain.
-*/
+  // initialize digital LED_BUILTIN on pin 13 as an output.
 
-  for (;;)
+  for (;;) // A Task shall never return or exit.
   {
-    // read the input on analog pin 0:
-    int sensorValue = analogRead(A7);  /// modify for your input pin!
-    // print out the value you read:
-    Serial.println(sensorValue);
-    vTaskDelay(500/portTICK_PERIOD_MS);  // 0.5 sec in between reads for stability
+    OCR4A = melody[curr];
+    vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
+    curr++;
+    if (curr == 9 && (timesRun < 2)) {
+      timesRun++;
+      OCR4A = 0;
+      curr = 0;
+      vTaskDelay( 1500 / portTICK_PERIOD_MS ); // wait for 1.5 second
+    } else if (curr == 9) {
+      OCR4A = 0;
+      vTaskSuspend(TaskRT2_Handler);
+    }
   }
 }

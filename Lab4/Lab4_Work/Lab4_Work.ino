@@ -1,4 +1,5 @@
 #include <Arduino_FreeRTOS.h>
+#include <queue.h> 
 
 #define NOTE_1 16000000 / (2 * 293) - 1    ///< to output 293 Hz to Pin 6
 #define NOTE_2 16000000 / (2 * 329) - 1    ///< to output 329 Hz to Pin 6
@@ -7,13 +8,21 @@
 #define NOTE_5 16000000 / (2 * 196) - 1    ///< to output 196 Hz to Pin 6
 #define NOTE_rest 0                        ///< to output 0 Hz to Pin 6
 
+// define 3 tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec ) and for RT3
+void RT1( void *pvParameters );
+void RT2( void *pvParameters );
+void RT3p0(void *pvParameters);
+
+TaskHandle_t TaskRT2_Handler;
+TaskHandle_t TaskRT3p0_Handler;
 
 /// array defining all the frequencies of the melody
 long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
 uint8_t curr = 0;
 int timesRun = 0;
+int N = 20;
+int* nPointer = &N;
 
-TaskHandle_t TaskRT2_Handler;
 
 
 
@@ -24,9 +33,7 @@ TaskHandle_t TaskRT2_Handler;
 //   to your setup.
 ////////////////////////////////////////////////
 
-// define two tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec )
-void RT1( void *pvParameters );
-void RT2( void *pvParameters );
+
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -54,7 +61,13 @@ void setup() {
     ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  &TaskRT2_Handler );
   
-  
+  xTaskCreate(
+    RT3p0
+    ,  "RT3p0"   // A name just for humans
+    ,  256  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  nPointer
+    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  &TaskRT3p0_Handler ); 
   
   // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
   //  (note how the above comment is WRONG!!!)
@@ -104,4 +117,16 @@ void RT2(void *pvParameters)  // This is a task.
       vTaskSuspend(TaskRT2_Handler);
     }
   }
+}
+
+void RT3p0(void *pvParameters) {
+  int arraysize = &pvParameters;
+
+  double arrayOfData[arraysize];
+
+  for (int i = 0; i < arraysize; i++) {
+    arrayOfData[i] = (double) (random(0, 5000)); 
+  }
+  xQueueCreate(arraysize, sizeof (double) );
+  vTaskSuspend(TaskRT3p0_Handler);
 }

@@ -175,7 +175,7 @@ void RT3p1(void *pvParameters) {
     y = millis();
 
     xy = y - x;
-    Serial.print("Time to run FFT: ");
+    Serial.print("Time to run FFT (ms) : ");
     Serial.println(xy);
   }
 }

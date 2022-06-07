@@ -1,3 +1,4 @@
+#include <arduinoFFT.h>
 #include <Arduino_FreeRTOS.h>
 #include <queue.h> 
 
@@ -31,7 +32,9 @@ int amplitude = 50;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+  Serial.begin(9600);
 
+  
   noInterrupts();
     TCCR4A = B01010100; ///< bottom two bits 0 (WGM31 & WGM30)
     TCCR4B = B00001001; ///< 4th bit set to 1 (WGMn4 & WGMn3) and set bottom bit for clock select
@@ -52,15 +55,15 @@ void setup() {
     ,  "Close Encounters of the Third Kind"   // A name just for humans
     ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
-    ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
 
   xTaskCreate(
     RT3p0
     ,  "RT3p0"   // A name just for humans
     ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
-    ,  (void*)&N
-    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL
+    ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL ); 
 
   xTaskCreate(
@@ -68,7 +71,7 @@ void setup() {
     ,  "RT3p1"   // A name just for humans
     ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
-    ,  0  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  &TaskRT3p1_Handler ); 
 
   xTaskCreate(
@@ -76,8 +79,8 @@ void setup() {
     ,  "RT4"   // A name just for humans
     ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL
-    ,  0  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  NULL ); 
+    ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL );
 
 
     
@@ -135,50 +138,66 @@ void RT2(void *pvParameters)  // This is a task.
 
 QueueHandle_t xQueue1, xQueue2;
 arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
+double vReal[64];
+double vImag[64];
+double p[64];
 
-void RT3p0(void *parameter) {
-  
-  int arraysize = *((int*) parameter);
 
-  double (*p)[arraysize];
-  double arrayOfData[arraysize];
+void RT3p0(void *pvParameters) {
+  vTaskSuspend(TaskRT3p1_Handler);
+  double arrayOfData[64];
 
-  for (int i = 0; i < arraysize; i++) {
+  for (int i = 0; i < 64; i++) {
     arrayOfData[i] = (double) (random(5000)); 
   }
   
-  p = &arrayOfData;
+  for (int j = 0; j < 64; j++) {
+    p[j] = arrayOfData[j];
+  }
   xQueue1 = xQueueCreate(2, sizeof (double) );
   xQueue2 = xQueueCreate(2, sizeof (int) );
-  
-  
 
-  
-  vTaskSuspend(NULL);
+
   vTaskResume(TaskRT3p1_Handler);
+  vTaskSuspend(NULL);
+  
 }
 
+
 void RT3p1(void *pvParameters) {
-  xQueueSend(xQueue1, p, 0);
-  
-  vTaskSuspend(NULL);
+  for (;;) {
+    int x, y, z, xy;
+    
+    x = millis();
+    xQueueSendToBack(xQueue1, &p, portMAX_DELAY);
+    Serial.println("Array of doubles now in the Queue1");
+    xQueueReceive(xQueue2, &z, portMAX_DELAY);
+    y = millis();
+
+    xy = y - x;
+    Serial.print("Time to run FFT: ");
+    Serial.println(xy);
+  }
 }
 
 
 
 void RT4(void *pvParameters) {
-  
+  static double buffer1[64];
+
   for (;;) {
+    int x = 1;
+    xQueueReceive(xQueue1, &buffer1, portMAX_DELAY);
+    // Serial.println("Received data into buffer1");
     for (int i = 0; i < 5; i++) {
-      int arr[N];
-      xQueueReceive(xQueue1, &arr[N], 0);
-      for (int j = 0; j < N; j++) {
-        vReal[j] = arr[j]; /* Build data with positive and negative values*/
+      // Serial.println("4 is running");
+      for (int j = 0; j < 64; j++) {
+        vReal[j] = buffer1[j]; // Build data with positive and negative values
         vImag[j] = 0.0; // imaginary part
       }
-      FFT.compute(
+      FFT.Compute(vReal, vImag, 64, FFT_FORWARD); /* Compute FFT */
     }
-    
-    vTaskSuspend(NULL);
+    // Serial.println("FFT has run 5 times, now print time");
+    xQueueSendToBack(xQueue2, &x, portMAX_DELAY); 
   }
 }

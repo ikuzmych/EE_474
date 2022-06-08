@@ -1,66 +1,70 @@
-#include <Arduino_FreeRTOS.h>
-
-#define ECHOPIN 10
-#define TRIGPIN 9
-#define INPUT_PORT_B4 (~(1 << DDB4))
-#define OUTPUT_PORT_H6 (1 << DDH6)
-#define OUTPUT_PORT_L2 (1 << DDL2)
-#define OUTPUT_PORT_L4 (1 << DDL4)
-
-
-#define TURN_OFF_LED (~(1 << PORTL2))
-#define TURN_ON_LED (1 << PORTL2)
-#define TURN_ON_BUZZER (1 << PORTL4)
-#define TURN_OFF_BUZZER (~(1 << PORTL4))
-
-
-/* Constants for LED and buzzer rates */
-#define SIX_FEET 72
-/* Lab_3_DDS_T4.ino
- * @file   Lab_3_DDS_T4.ino
+/* Lab4_Project.ino
+ * @file   Lab4_Project.ino
  *   @author    Ruvim Piholyuk, Illya Kuzmych
- *   @date      26-May-2022
- *   @brief   Demo 5 according to spec
+ *   @date      7-June-2022
+ *   @brief   Final project for EE 474
  *   
- *  Lab_3_DDS_T4.ino demonstrates both task 2, and 3
- *  with the use of a DDS scheduler.
+ *  Lab4_Project.ino demonstrates our working prototype utilizing an ultrasonic sensor
+ *  and external LED/buzzer to behave as failsafe proximity sensor
  *  
- *  Pin 6 is used to play the theme of "Close Encounters
- *  of the Third Kind" through a speaker. Every note is played
- *  for one second and there is a 2 second pause between notes.
- *  Once all notes are played the task sleeps for 4 seconds 
- *  until it repeats.
+ *  To successfully build our project we needed to utilize two peripherals we have not in the past:
+ *  A buzzer and an ultrasonic sensor. We utilized the ultrasonic sensor to constantly run and read data
+ *  and update the blink and buzzer rates based on closer/farther distances from any hazard
+ *  Pin 45 was the output of the buzzer which was set to high or low, and Pin 47 was the output of the LED
  *  
- *  Pins 23-26 and Pins 30-37 control the 4 7-seg display.
- *  4 7-seg displays change every 100ms.
- *  the 4 displays display the time in 100 seconds, 10 seconds,
- *  seconds, and 100 ms from left to right.
+ *  
+ *  Pin 9 is to read in the echo from the ultrasonic sensor, while Pin 10 is to set trigger to high
+ *  Every task runs at the maximum tick rate allowed by freeRTOS (15 ms)
+ *  The lights update corresponding to the delay within, so the system transitions more smoothly from close to farther distances
+ *  than from farther to closer distances
  */
- 
-#define FIVE_FEET 60
-#define FOUR_FEET 48 
-#define THREE_FEET 36
-#define TWO_FEET 24
-#define ONE_FEET 12
+
+#include <Arduino_FreeRTOS.h> ///< include the freeRTOS library
+
+#define ECHOPIN 10 ///< input pin for the echo from the ultrasonic sensor
+#define TRIGPIN 9 ///< output pin for the trigger on the ultrasonic sensor
+#define INPUT_PORT_B4 (~(1 << DDB4)) ///< set Port B4 to be an input port
+#define OUTPUT_PORT_H6 (1 << DDH6) ///< set Port H6 to be an output port
+#define OUTPUT_PORT_L2 (1 << DDL2) ///< set Port L2 to be an output port
+#define OUTPUT_PORT_L4 (1 << DDL4) ///< set Port L4 to be an output port
+
+// Constants for the bitwise operations to turn on/off the LED and the buzzer
+#define TURN_OFF_LED (~(1 << PORTL2)) ///< bitwise operation to set PORTL2 to low
+#define TURN_ON_LED (1 << PORTL2) ///< bitwise operation to set PORTL2 to high
+#define TURN_ON_BUZZER (1 << PORTL4) ///< bitwise operation to set PORTL4 to high
+#define TURN_OFF_BUZZER (~(1 << PORTL4)) ///< bitwise operation to set PORTL4 to low
+
+
+// Constants for LED and buzzer rates
+#define SIX_FEET 72 ///< 72 inches
+#define FIVE_FEET 60 ///< 60 inches
+#define FOUR_FEET 48 ///< 48 inches
+#define THREE_FEET 36 ///< 36 inches
+#define TWO_FEET 24 ///< 24 inches
+#define ONE_FEET 12 ///< 12 inches
 
 
 // Global variables
-long duration;
-int distance;
+long duration; ///< tracks the duration for the echo to reach the object and back to the sensor
+int distance; ///< variable to hold distance based on the duration for the signal to travel
 
-
+/**
+ * main block to initialize all ports and create tasks in freeRTOS
+ *
+ */
 void setup() {
   Serial.begin(9600);
 
-  DDRL |= OUTPUT_PORT_L2;
-  DDRH |= OUTPUT_PORT_H6;
-  DDRB &= INPUT_PORT_B4;
-  DDRL |= OUTPUT_PORT_L4;
+  // 
+  DDRL |= OUTPUT_PORT_L2; ///< Set port L2 to output
+  DDRH |= OUTPUT_PORT_H6; ///< Set Port H6 to output
+  DDRB &= INPUT_PORT_B4; ///< set Port B4 to input
+  DDRL |= OUTPUT_PORT_L4; ///< Set Port L4 to output
 
   xTaskCreate(
     readData
     ,  "Read the Sensor Data"   // A name just for humans
-    ,  1024  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  1024
     ,  NULL
     ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
@@ -68,15 +72,15 @@ void setup() {
   xTaskCreate(
     ledWarning
     ,  "Adjustor for LED blink rate"   // A name just for humans
-    ,  512  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  512
     ,  NULL
     ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
 
   xTaskCreate(
     buzzerWarning
-    ,  "Buzzer sound"   // A name just for humans
-    ,  512  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  "Buzzer sound"
+    ,  512
     ,  NULL
     ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
@@ -88,7 +92,9 @@ void loop() {
 }
 
 /**
- * 
+ * Method responsible for reading data from the ultrasonic sensor
+ *
+ * @param *pvParameters pointer to NULL parameter
  */
 void readData(void *pvParameters) {
   for (;;) {
@@ -105,6 +111,12 @@ void readData(void *pvParameters) {
   }
 }
 
+
+/**
+ * Method responsible for controlling the blink rate of the LED
+ *
+ * @param *pvParameters pointer to NULL parameter
+ */
 void ledWarning(void *pvParameters) {
   int delayTime;
   
@@ -181,6 +193,11 @@ void ledWarning(void *pvParameters) {
   }
 }
 
+/**
+ * Method responsible for controlling the buzz rate of the speaker
+ *
+ * @param *pvParameters pointer to NULL parameter
+ */
 void buzzerWarning(void *pvParameters) {
   int delayTime;
   

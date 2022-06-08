@@ -26,7 +26,7 @@
 #define NOTE_5 16000000 / (2 * 196) - 1    ///< to output 196 Hz to Pin 6
 #define NOTE_rest 0                        ///< to output 0 Hz to Pin 6
 
-#define ARR_SIZE 64 ///< buffer size to run the FFT
+#define ARR_SIZE 128 ///< buffer size to run the FFT
 
 
 // define 5 tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec ) and for RT3, RT4

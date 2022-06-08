@@ -1,6 +1,23 @@
-#include <arduinoFFT.h>
-#include <Arduino_FreeRTOS.h>
-#include <queue.h> 
+/* Lab4_Work.ino
+ * @file   Lab4_Work.ino
+ *   @author    Ruvim Piholyuk, Illya Kuzmych
+ *   @date      7-June-2022
+ *   @brief   Lab 4 EE 474 Part I.3
+ *   
+ *  Lab4_Work.ino demonstrates our functioning freeRTOS program using Queues and 
+ *  other freeRTOS function
+ *  
+ *  Utilize several functions to achieve desired functionality of part I.3 according to spec
+ *  Pin 6 is for the speaker output to play Close Encounters, Pin 47 is for the LED
+ *  
+ *  Every task runs at the maximum tick rate allowed by freeRTOS (15 ms)
+ *  The freeRTOS Queue is used to manage and send signals between the FFT. One is responsible for sending and receiving the 
+ *  
+ */
+
+#include <arduinoFFT.h> ///< for the FFT algorithm
+#include <Arduino_FreeRTOS.h> ///< for the freeRTOS functionality
+#include <queue.h> ///< for the freeRTOS queue
 
 #define NOTE_1 16000000 / (2 * 293) - 1    ///< to output 293 Hz to Pin 6
 #define NOTE_2 16000000 / (2 * 329) - 1    ///< to output 329 Hz to Pin 6
@@ -9,13 +26,17 @@
 #define NOTE_5 16000000 / (2 * 196) - 1    ///< to output 196 Hz to Pin 6
 #define NOTE_rest 0                        ///< to output 0 Hz to Pin 6
 
-// define 3 tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec ) and for RT3
+#define ARR_SIZE 64 ///< buffer size to run the FFT
+
+
+// define 5 tasks for Blink & Close Encounters ( RT1 & RT2 in the lab spec ) and for RT3, RT4
 void RT1( void *pvParameters );
 void RT2( void *pvParameters );
 void RT3p0(void* parameter);
 void RT3p1(void *pvParameters);
 void RT4(void *pvParameters);
 
+/// Task handle to turn off RT3p1
 TaskHandle_t TaskRT3p1_Handler;
 
 
@@ -23,10 +44,16 @@ TaskHandle_t TaskRT3p1_Handler;
 long melody[] = { NOTE_1, NOTE_rest, NOTE_2, NOTE_rest, NOTE_3, NOTE_rest, NOTE_4, NOTE_rest, NOTE_5 };
 uint8_t curr = 0;
 int timesRun = 0;
-int N = 64;
 
+/// amplitude for the FFT to run with
 int amplitude = 50;
-// int* nPointer = &N;
+
+/// for the FFT and Queue
+QueueHandle_t xQueue1, xQueue2; ///< Queues for sending buffer data and "done computing" signal
+arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
+double vReal[ARR_SIZE]; ///< real portion of FFT
+double vImag[ARR_SIZE]; ///< imaginary portion of the FFT
+double p[ARR_SIZE]; ///< reference to buffer full of random doubles
 
 
 
@@ -98,6 +125,11 @@ void loop()
 /*---------------------- Tasks ---------------------*/
 /*--------------------------------------------------*/
 
+/**
+ * Turns on LED for 100 ms, off for 250 ms
+ *
+ * @param *pvParameters NULL parameter
+ */
 void RT1(void *pvParameters)  // This is a task.
 {
  // (void) pvParameters;  // allocate stack space for params
@@ -111,6 +143,13 @@ void RT1(void *pvParameters)  // This is a task.
   }
 }
 
+
+/**
+ * Turns on Close Encounters with 1.5 second pause in between
+ * through pin 6 and turns off after 3 play-throughs
+ *
+ * @param *pvParameters NULL parameter
+ */
 void RT2(void *pvParameters)  // This is a task.
 {
  // (void) pvParameters;  // allocate stack space for params
@@ -129,29 +168,30 @@ void RT2(void *pvParameters)  // This is a task.
       vTaskDelay( 1500 / portTICK_PERIOD_MS ); // wait for 1.5 second
     } else if (curr == 9) {
       OCR4A = 0;
-      vTaskSuspend(NULL);
+      vTaskSuspend(NULL); // suspend the current running task (RT2)
     }
   }
 }
 
 
 
-QueueHandle_t xQueue1, xQueue2;
-arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
-double vReal[64];
-double vImag[64];
-double p[64];
 
 
+/**
+ * Initializes two Queues for tasks RT3p1 and RT4
+ * and fills up array with random double values
+ *
+ * @param *pvParameters NULL parameter
+ */
 void RT3p0(void *pvParameters) {
   vTaskSuspend(TaskRT3p1_Handler);
-  double arrayOfData[64];
+  double arrayOfData[ARR_SIZE];
 
-  for (int i = 0; i < 64; i++) {
+  for (int i = 0; i < ARR_SIZE; i++) {
     arrayOfData[i] = (double) (random(5000)); 
   }
   
-  for (int j = 0; j < 64; j++) {
+  for (int j = 0; j < ARR_SIZE; j++) {
     p[j] = arrayOfData[j];
   }
   xQueue1 = xQueueCreate(2, sizeof (double) );
@@ -164,6 +204,12 @@ void RT3p0(void *pvParameters) {
 }
 
 
+/**
+ * Sends the buffer to RT4 which computes the FFT.
+ * Outputs the duration to compute the FFT 5 times
+ *
+ * @param *pvParameters NULL parameter
+ */
 void RT3p1(void *pvParameters) {
   for (;;) {
     int x, y, z, xy;
@@ -181,9 +227,13 @@ void RT3p1(void *pvParameters) {
 }
 
 
-
+/**
+ * Receives buffer data through the Queue and computes FFT 5 times
+ *
+ * @param *pvParameters NULL parameter
+ */
 void RT4(void *pvParameters) {
-  static double buffer1[64];
+  static double buffer1[ARR_SIZE];
 
   for (;;) {
     int x = 1;
@@ -191,11 +241,11 @@ void RT4(void *pvParameters) {
     // Serial.println("Received data into buffer1");
     for (int i = 0; i < 5; i++) {
       // Serial.println("4 is running");
-      for (int j = 0; j < 64; j++) {
+      for (int j = 0; j < ARR_SIZE; j++) {
         vReal[j] = buffer1[j]; // Build data with positive and negative values
         vImag[j] = 0.0; // imaginary part
       }
-      FFT.Compute(vReal, vImag, 64, FFT_FORWARD); /* Compute FFT */
+      FFT.Compute(vReal, vImag, ARR_SIZE, FFT_FORWARD); /* Compute FFT */
     }
     // Serial.println("FFT has run 5 times, now print time");
     xQueueSendToBack(xQueue2, &x, portMAX_DELAY); 

@@ -16,6 +16,27 @@
 
 /* Constants for LED and buzzer rates */
 #define SIX_FEET 72
+/* Lab_3_DDS_T4.ino
+ * @file   Lab_3_DDS_T4.ino
+ *   @author    Ruvim Piholyuk, Illya Kuzmych
+ *   @date      26-May-2022
+ *   @brief   Demo 5 according to spec
+ *   
+ *  Lab_3_DDS_T4.ino demonstrates both task 2, and 3
+ *  with the use of a DDS scheduler.
+ *  
+ *  Pin 6 is used to play the theme of "Close Encounters
+ *  of the Third Kind" through a speaker. Every note is played
+ *  for one second and there is a 2 second pause between notes.
+ *  Once all notes are played the task sleeps for 4 seconds 
+ *  until it repeats.
+ *  
+ *  Pins 23-26 and Pins 30-37 control the 4 7-seg display.
+ *  4 7-seg displays change every 100ms.
+ *  the 4 displays display the time in 100 seconds, 10 seconds,
+ *  seconds, and 100 ms from left to right.
+ */
+ 
 #define FIVE_FEET 60
 #define FOUR_FEET 48 
 #define THREE_FEET 36

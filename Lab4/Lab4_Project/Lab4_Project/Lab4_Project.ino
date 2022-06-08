@@ -23,7 +23,7 @@
 #define ONE_FEET 12
 
 
-
+// Global variables
 long duration;
 int distance;
 
@@ -66,6 +66,9 @@ void loop() {
   // does nothing 
 }
 
+/**
+ * 
+ */
 void readData(void *pvParameters) {
   for (;;) {
     PORTH &= ~(1 << PORTH6);
